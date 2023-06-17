@@ -29,7 +29,39 @@
 
 (defmacro comment (&rest _) nil)
 
-;;(defgroup noether)
+(defun noether/-extract-props (body-list &optional acc)
+  "Extract the props pairs from BODY-LIST with an optional accumulator ACC.
+
+It will returen a pair in form of (body . props)."
+  (let ((k (car body-list))
+        (rest (cdr body-list)))
+
+    (if (and k (keywordp k))
+        (fg42/extract-props
+         (cdr rest)
+         (cons (cdr rest) (plist-put (cdr acc) k (car rest))))
+      (cons body-list (cdr acc)))))
+
+(defmacro defview (name docs &rest body)
+  "Create a new view with the given NAME with the given DOCS and BODY.
+BODY will be parsed in a way that any starting pair of keyword and value
+will be used as the view properties and the rest will be the body of
+the show function."
+  (declare (doc-string 2))
+  (let* ((parsed-body (fg42/extract-props body))
+         (show-body (car parsed-body))
+         (props (cdr parsed-body)))
+    `(progn
+       (defvar ,name
+         (list
+          :name ',name
+          ,@props
+          :show (lambda () ,@show-body))
+         ,docs)
+       ;; It's not necessary but well doesn't hurt either
+       ;; for future reference
+       (put ',name :updaters ()))))
+
 
 (defvar noether/views ())
 (defvar noether/-internal-state)
@@ -45,27 +77,36 @@
 (defun noether/-line-format ()
   (format "%04d" noether/-line))
 
-(defvar testt
+(defview testt
+  "Just a test view"
+  :managed? t
+  :buffer "*mainview*"
+  :binding (kbd "C-c 1")
+  :units
   (list
-   :managed? t
-   :buffer "*mainview*"
-   :binding (kbd "C-c 1")
-   :units
    (list
-    (list
-     :label "L:"
-     :name :line
-     :len 4
-     :init (lambda ()
-             (add-hook 'post-command-hook #'noether/-update-line))
-     :var 'noether/-line
-     :fn #'noether/-line-format))))
+    :label "L:"
+    :name :line
+    :len 4
+    :init (lambda ()
+            (add-hook 'post-command-hook #'noether/-update-line))
+    :var 'noether/-line
+    :fn #'noether/-line-format)))
 
 (comment
   (remove-hook 'post-command-hook #'noether/-update-line)
   (line-number-mode)
   (line-number-at-pos)
-  (add-variable-watcher))
+  (add-variable-watcher)
+  (noether/show testt)
+  (setq noether/views (cons testt noether/views))
+  (setq noether/views nil)
+  (noether/-unit-get (car (noether/-view-get testt :units)) :len)
+  noether/views
+  (pp (car (get 'testt :updaters)))
+  (pp (mapc #'noether/-setup-views noether/views))
+  post-command-hook
+  (posframe-delete-all))
 
 (defmacro noether/-unit-get (unit key &optional default)
   ""
@@ -78,13 +119,19 @@
 
 
 (defun noether/show (view)
+  ""
+  ;; View has to be processed
   (interactive)
-  (let ((buf (get-buffer-create (noether/-view-get view :buffer "*noether*"))))
-    (message "> %s" (noether/-view-get view :buffer "*noether*"))
+  (let ((buf (get-buffer-create (noether/-view-get view :buffer "*noether*")))
+        (show-fn (noether/-view-get view :show (lambda ())))
+        (name (noether/-view-get view :name)))
     (when (noether/-view-get view :managed?)
       (with-current-buffer buf
-        (erase-buffer)
-        (insert "A | B | C")))
+        ;;(erase-buffer)
+        (funcall show-fn)
+        (mapc
+         (lambda (updater) (funcall updater))
+         (get name :updaters))))
 
     (posframe-show
      buf
@@ -96,65 +143,76 @@
      ;;:poshandler #'posframe-poshandler-frame-bottom-right-corner
      :border-width (noether/-view-get view :border 0)
      :border-color (noether/-view-get view :border-color "#eeeefe")
-     :accept-focus (noether/-view-get view :accept-focus)
+     :accewpt-focus (noether/-view-get view :accept-focus)
      :timeout (noether/-view-get view :timeout 5)
      :refresh (noether/-view-get view :refresh 1))))
 
-(comment
-  (noether/show testt)
-  (setq noether/views (cons testt noether/views))
-  (setq noether/views nil)
-  noether/views
-  (mapc #'noether/-setup-views noether/views)
-  (posframe-delete-all))
+
+;; We need to keep this function as simple as possible
+;; and avoid any performance pitfalls
+(defun noether/update-unit (buf f start-point len)
+  "Update the buffer BUF at START-POINT with length LEN by calling F."
+  ;; call f get the return value and put it in the dedicated cell
+  (let ((res (apply f)))
+    (with-current-buffer buf
+      (save-excursion
+        (goto-char start-point)
+        (insert (truncate-string-to-width res len))))))
+
+(defun noether/-make-updater (buf f start-point len)
+  "Create an updater for the given buffer BUF using the function F.
+It will call `noether/update-unit' and path START-POINT and LEN along
+side BUF and F to it.  It's simple trick to make small a closure."
+  (lambda () (noether/update-unit buf f start-point len)))
 
 
-(defun noether/update (view unit)
-  "Update the the given UNIT name in the given VIEW."
-  (let ((f (noether/-unit-get unit :f (lambda (_ _) (error (format "No `fn' in %s" unit)))))
-        (state (plist-get view unit)))
-    (when (null state)
-      (error (format "Can't find unit ")))
-    (funcall f state)))
-
-
-(defun noether/-setup-unit (state view unit)
+(defun noether/-setup-unit (point-state view unit)
+  "Setup the given UNIT in respect of VIEW using the POINT-STATE as the boundary."
   (let* ((init-fn (noether/-unit-get unit :init))
+         (f (noether/-unit-get unit :fn))
+         (len (noether/-unit-get unit :len))
+         (label (noether/-unit-get unit :label ""))
+         (buf (noether/-view-get view :buffer))
          (var (noether/-unit-get unit :var))
          (name (noether/-unit-get unit :name))
-         (start-point (+ (or (plist-get view :point) 0) (length (noether/-unit-get unit :label ""))))
-         ;; TODO: We need to raise an error earlier if size is not provided
-         (end-point (+ start-point (noether/-unit-get unit :size 0))))
+         (start-point (+ point-state (length label)))
+         (end-point (+ start-point (noether/-unit-get unit :len 0)))
+         ;; Just a small trick to make the resulting closure smaller
+         (updater (noether/-make-updater buf f start-point len)))
 
     (when (null name)
       (error (format "No :name for unit %s" unit)))
 
-    ;; (setq state
-    ;;       (plist-put
-    ;;        (plist-put state :point end-point)
-    ;;        name
-    ;;        `(:unit unit :cell (,start-point ,end-point))))
-    (setq view
-          (plist-put
-           (plist-put view :point end-point)
-           name
-           `(:unit unit :cell (,start-point ,end-point))))
+    (when (null f)
+      (error (format "No `fn' in %s" unit)))
 
     (when init-fn
       (funcall init-fn))
 
     (when var
-      (add-variable-watcher var (lambda ()
-                                  (noether/update view :name))))))
+      (add-variable-watcher var updater))
+
+    (let ((name (noether/-view-get view :name)))
+      (put name :updaters
+           (cons updater (get name :updaters))))
+
+    end-point))
+
+
+(defun noether/-reset-view-state (view)
+  "Reset the state stored in VIEW.
+E.g. the updaters list."
+  (put (noether/-view-get view :name) :updaters nil))
 
 
 (defun noether/-setup-views (view)
   "Setup the given VIEW by setting up its units."
-  (setq noether/-internal-state
-        (seq-reduce
-         (lambda (state u) (noether/-setup-unit state view u))
-         (noether/-view-get view :units)
-         ())))
+  (noether/-reset-view-state view)
+  (seq-reduce
+   (lambda (state u)
+     (noether/-setup-unit state view u))
+   (noether/-view-get view :units)
+   0))
 
 
 (define-minor-mode noether/global-statue-mode

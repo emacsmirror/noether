@@ -27,8 +27,14 @@
 (require 'ert)
 (require 'noether)
 
-(ert-deftest n ()
-    (should (= 1 1)))
+(ert-deftest test-noether/update ()
+  "Update should call the :f function and pass the state correctly."
+  (let* ((f (lambda (_) (error "Expected" :type 'ex)))
+         (view (list :foo (list :cell '(0 . 2) :unit (list :f f)))))
+
+    (should-error (noether/update view :foo)
+                  :type 'ex)
+    ))
 
 
 (provide 'noether-test)
