@@ -42,6 +42,13 @@ It will returen a pair in form of (body . props)."
          (cons (cdr rest) (plist-put (cdr acc) k (car rest))))
       (cons body-list (cdr acc)))))
 
+(defun noether/-create-placeholder (unit)
+  "Create a placeholder for UNIT based on its :label and :len."
+  (concat
+   (noether/-unit-get unit :label "")
+   (make-string (noether/-unit-get unit :len 0) ? )))
+
+
 (defmacro defview (name docs &rest body)
   "Create a new view with the given NAME with the given DOCS and BODY.
 BODY will be parsed in a way that any starting pair of keyword and value
@@ -50,7 +57,11 @@ the show function."
   (declare (doc-string 2))
   (let* ((parsed-body (fg42/extract-props body))
          (show-body (car parsed-body))
-         (props (cdr parsed-body)))
+         (props (cdr parsed-body))
+         (initial-content
+          (mapconcat #'noether/-create-placeholder (eval (plist-get props :units))
+                     (or (plist-get props :separator) ""))))
+
     `(progn
        (defvar ,name
          (list
@@ -60,7 +71,9 @@ the show function."
          ,docs)
        ;; It's not necessary but well doesn't hurt either
        ;; for future reference
-       (put ',name :updaters ()))))
+       (put ',name :updaters ())
+       (put ',name :initial-content ,initial-content)
+       t)))
 
 
 (defvar noether/views ())
@@ -85,7 +98,7 @@ the show function."
   :units
   (list
    (list
-    :label "L:"
+    :label "L: "
     :name :line
     :len 4
     :init (lambda ()
@@ -104,6 +117,7 @@ the show function."
   (noether/-unit-get (car (noether/-view-get testt :units)) :len)
   noether/views
   (pp (car (get 'testt :updaters)))
+  (pp  (get 'testt :initial-content))
   (pp (mapc #'noether/-setup-views noether/views))
   post-command-hook
   (posframe-delete-all))
@@ -122,12 +136,15 @@ the show function."
   ""
   ;; View has to be processed
   (interactive)
-  (let ((buf (get-buffer-create (noether/-view-get view :buffer "*noether*")))
-        (show-fn (noether/-view-get view :show (lambda ())))
-        (name (noether/-view-get view :name)))
+  (let* ((show-fn (noether/-view-get view :show (lambda ())))
+         (name (noether/-view-get view :name))
+         ;; What if the user killed the buffer before?
+         (buf (get-buffer-create (noether/-view-get view :buffer (format "*%s*" name)))))
+    ;; TODO: Check to see whether the buffer is populated. If not, it means
+    ;;       that user killed the buffer manually. We need to repopulate it
+    ;;       again
     (when (noether/-view-get view :managed?)
       (with-current-buffer buf
-        ;;(erase-buffer)
         (funcall show-fn)
         (mapc
          (lambda (updater) (funcall updater))
@@ -173,6 +190,7 @@ side BUF and F to it.  It's simple trick to make small a closure."
          (len (noether/-unit-get unit :len))
          (label (noether/-unit-get unit :label ""))
          (buf (noether/-view-get view :buffer))
+         (sep (noether/-view-get view :separator))
          (var (noether/-unit-get unit :var))
          (name (noether/-unit-get unit :name))
          (start-point (+ point-state (length label)))
@@ -196,7 +214,8 @@ side BUF and F to it.  It's simple trick to make small a closure."
       (put name :updaters
            (cons updater (get name :updaters))))
 
-    end-point))
+    ;; Move the point to the location of the next unit
+    (+ end-point (length (or sep "")))))
 
 
 (defun noether/-reset-view-state (view)
@@ -208,6 +227,13 @@ E.g. the updaters list."
 (defun noether/-setup-views (view)
   "Setup the given VIEW by setting up its units."
   (noether/-reset-view-state view)
+
+  (let ((name (noether/-view-get view :name)))
+    (with-current-buffer (get-buffer-create (noether/-view-get view :buffer (format "*%s*" name)))
+      (erase-buffer)
+      (goto-char 0)
+      (insert (get name :initial-content))))
+
   (seq-reduce
    (lambda (state u)
      (noether/-setup-unit state view u))
@@ -231,6 +257,7 @@ It reports them back in a status bar like frame."
                noether/views)
               map))
   (mapc #'noether/-setup-views noether/views))
+
 
 (comment
   (noether/global-statue-mode))
