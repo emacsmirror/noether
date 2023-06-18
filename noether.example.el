@@ -33,11 +33,10 @@
   "Update the `noether/-line' variable after each command."
   ;; TODO: calling `line-number-at-pos' is not performant
   ;; replace this with a better alt
-  (message "here.... %s" (line-number-at-pos))
-  (set noether/-line (line-number-at-pos)))
+  (setq noether/-line (line-number-at-pos)))
 
-(defun noether/-line-format (&rest _)
-  (format "%04d" noether/-line))
+(defun noether/-line-format (_ v _ _)
+  (format "%04d" v))
 
 
 (defview example-bar
@@ -52,7 +51,6 @@
     :name :line
     :len 4
     :init  (lambda ()
-             (message "[len-unit-init]")
              (add-hook 'post-command-hook #'noether/-update-line))
     :var 'noether/-line
     :fn #'noether/-line-format)))

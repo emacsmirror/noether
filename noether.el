@@ -108,7 +108,8 @@ the show function."
     (when (noether/-view-get view :managed?)
       (with-current-buffer buf
         (funcall show-fn)
-        (mapc #'funcall (get name :updaters))))
+        ;;(mapc #'funcall (get name :updaters))
+        ))
 
     (posframe-show
      buf
