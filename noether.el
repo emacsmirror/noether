@@ -112,6 +112,20 @@ key/value from the original definition."
                f-props (list ,@orig-props)))))
 
 
+(defvar noether--frame-defaults
+  (list
+   :min-height 1  ;; (noether--view-get view :height 1)
+   :min-width 10  ;; (noether--view-get view :width 10)
+   :position '(0 . 0) ;;(cons (- (frame-outer-width) 10) (- (frame-outer-height) 10))
+   ;;:position (noether--view-get view :position '(0 . 0))
+   ;;:poshandler (noether--view-get view :poshandler)
+   :border-width 0 ;; (noether--view-get view :border 0)
+   ;;:border-color (noether--view-get view :border-color "#eeeefe")
+   :accewpt-focus nil ;;(noether--view-get view :accept-focus)
+   :timeout 10        ;;(noether--view-get view :timeout 5)
+   :refresh 1         ;;(noether--view-get view :refresh 1)))
+   )
+  )
 
 (defun noether-show (view)
   "Draw the given VIEW on the screen."
@@ -120,29 +134,17 @@ key/value from the original definition."
   (let* ((show-fn (noether--view-get view :show (lambda ())))
          (name (noether--view-get view :name))
          ;; What if the user killed the buffer before?
-         (buf (get-buffer-create (noether--view-get view :buffer (format "*%s*" name)))))
+         (buf (get-buffer-create (noether--view-get view :buffer (format "*%s*" name))))
+         (props (noether--view-get view :frame)))
     ;; TODO: Check to see whether the buffer is populated. If not, it means
     ;;       that user killed the buffer manually. We need to repopulate it
     ;;       again
     (when (noether--view-get view :managed?)
       (with-current-buffer buf
-        (funcall show-fn)
-        ;;(mapc #'funcall (get name :updaters))
-        ))
+        (funcall show-fn)))
 
-    (posframe-show
-     buf
-     :min-height (noether--view-get view :height 1)
-     :min-width (noether--view-get view :width 10)
-
-     :position '(0 . 0) ;;(cons (- (frame-outer-width) 10) (- (frame-outer-height) 10))
-
-     ;;:poshandler #'posframe-poshandler-frame-bottom-right-corner
-     :border-width (noether--view-get view :border 0)
-     :border-color (noether--view-get view :border-color "#eeeefe")
-     :accewpt-focus (noether--view-get view :accept-focus)
-     :timeout (noether--view-get view :timeout 5)
-     :refresh (noether--view-get view :refresh 0.5))))
+    (let ((params (append (list buf) props noether--frame-defaults)))
+      (apply #'posframe-show params))))
 
 
 ;; We need to keep this function as simple as possible
@@ -229,7 +231,7 @@ E.g. the updaters list."
         (binding (noether--view-get view :binding)))
 
     (when (not (null binding))
-      (define-key global-noethor-mode-map binding
+      (define-key noether-global-mode-map binding
         (lambda () (interactive) (noether-show view))))
 
     (with-current-buffer (get-buffer-create (noether--view-get view :buffer (format "*%s*" name)))
@@ -259,13 +261,13 @@ E.g. the updaters list."
     (funcall (noether--view-get view :deinit (lambda ())))))
 
 
-(define-minor-mode noethor-global-mode
+(define-minor-mode noether-global-mode
   "A minor mode that keep tracks of different status blocks.
 It reports them back in a status bar like frame."
   :global t
   :lighter " ST42"
   :keymap (make-sparse-keymap)
-  (if global-noethor-mode
+  (if noether-global-mode
       (mapc #'noether--setup-views noether-views)
     (mapc #'noether--teardown-views noether-views)))
 

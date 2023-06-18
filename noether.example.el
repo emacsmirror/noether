@@ -6,7 +6,6 @@
 ;; URL: https://devheroes.codes/lxsameer/noether
 ;; Version: 0.1.0
 ;; Keywords: frames, modeline
-;; Package-Requires: (posframe (emacs "26.1"))
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -78,6 +77,11 @@
   :buffer "*mainview*"
   :binding (kbd "C-c 1")
   :separator "|"
+  :frame
+  (list
+   :position '(110 . 120)
+   :border-width 1
+   :border-color "#b9a388")
   :units
   (list
    (line-unit)
@@ -86,7 +90,7 @@
 
 (setq noether-views (list example-bar))
 
-(noethor-global-mode t)
+(noether-global-mode t)
 
 (provide 'noether.example)
 ;;; noether.example.el ends here
