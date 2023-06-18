@@ -156,9 +156,11 @@ It will pass WATCH-PARAMS to the unit's `:fn'"
   (let ((res (apply f watch-params)))
     (with-current-buffer buf
       (save-excursion
-        (goto-char (+ 1 start-point))
-        (delete-char len)
-        (insert (truncate-string-to-width res len))))))
+        (let ((txt (truncate-string-to-width res len)))
+          (replace-region-contents
+           (+ 1 start-point)
+           (+ 1 start-point len)
+           (lambda () (string-pad (truncate-string-to-width res len) len))))))))
 
 
 (defun noether--make-updater (buf f start-point len)
