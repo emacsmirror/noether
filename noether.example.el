@@ -24,8 +24,9 @@
 ;;; Change Log:
 ;;; Code:
 (setq debug-on-error t)
-(require 'noether-units)
 
+(require 'noether-units)
+;;(debug-on-entry 'noether--update-buffer-name)
 
 (defview example-bar
   "Just a test view"
@@ -43,7 +44,8 @@
   :units
   (list
    (line-unit)
-   (time-unit :label "B:")))
+   (time-unit :label "Time:")
+   (buffer-name-unit)))
 
 
 (setq noether-views (list example-bar))

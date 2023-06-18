@@ -25,7 +25,9 @@
 ;;; Code:
 (require 'noether)
 
-;; line number indicator ======================================================
+;; ============================================================================
+;; line number indicator
+;; ============================================================================
 (defvar noether--line 1)
 
 (defun noether--update-line ()
@@ -50,7 +52,48 @@
   :var 'noether--line
   :fn #'noether--line-format)
 
-;; Time indicator =============================================================
+;; ============================================================================
+;; Buffer name
+;; ============================================================================
+(defvar noether--buffer-name)
+
+(defun noether--update-buffer-name ()
+  "Set the current buffer name to the watched var."
+  (setq noether--buffer-name
+        (format-mode-line "%b")))
+
+
+(defun noether--format-buffer-name (_ v _ _)
+  "Format the buffer name V."
+  (let ((buf (get-buffer v)))
+    (format "%s%s %s"
+            (if (buffer-modified-p buf) "*" "-")
+            (if (verify-visited-file-modtime buf) "-" "*")
+            (string-trim v)))
+  )
+
+
+(defunit buffer-name-unit
+  "Show the current buffer name in the viwe.
+
+The format of the unit is like: `(*|-)(*|-)BUFFER-NAME'.
+The first char will be an asterisk if the buffer contains unsaved changes and
+the second char will be an asterisk if the file changed on the disk without Emacs
+knowing."
+  :label ""
+  :len 32
+  :init (lambda ()
+          (add-hook 'post-command-hook #'noether--update-buffer-name))
+
+  :deinit (lambda ()
+            (remove-hook 'post-command-hook #'noether--update-buffer-name))
+
+  :var 'noether--buffer-name
+  :fn #'noether--format-buffer-name)
+
+;; ============================================================================
+;; Time indicator
+;; ============================================================================
 (defvar noether--time "")
 (defvar noether--timer nil)
 (defun noether--set-time ()
