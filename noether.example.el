@@ -24,52 +24,8 @@
 ;;; Change Log:
 ;;; Code:
 (setq debug-on-error t)
-(require 'noether)
+(require 'noether-units)
 
-(defvar noether--line 1)
-
-(defun noether--update-line ()
-  "Update the `noether--line' variable after each command."
-  ;; TODO: calling `line-number-at-pos' is not performant
-  ;; replace this with a better alt
-  (setq noether--line (line-number-at-pos)))
-
-(defun noether--line-format (_ v _ _)
-  (format "%04d" v))
-
-(defvar noether--time "")
-(defvar noether--timer nil)
-(defun noether--set-time ()
-  (setq noether--time (format-time-string "%H:%M:%S")))
-
-(defun noether--time-format (_ v _ _)
-  "Just return the current time."
-  v)
-
-(defunit line-unit
-  "Show the line number."
-  :label "L:"
-  :len 4
-  :init  (lambda ()
-              (add-hook 'post-command-hook #'noether--update-line))
-  :deinit (lambda ()
-               (remove-hook 'post-command-hook #'noether--update-line))
-  :var 'noether--line
-  :fn #'noether--line-format)
-
-(defunit time-unit
-  "just the time for your bar."
-  :label "T:"
-  :len 8
-  :init  (lambda ()
-           (setq noether--timer
-                 (run-with-timer 1 1 #'noether--set-time)))
-  :deinit (lambda ()
-            (when noether--timer
-              (cancel-timer noether--timer)))
-
-  :var 'noether--time
-  :fn #'noether--time-format)
 
 (defview example-bar
   "Just a test view"
@@ -81,7 +37,9 @@
   (list
    :position '(110 . 120)
    :border-width 1
-   :border-color "#b9a388")
+   ;; :left-fringe 5
+   ;; :right-fringe 5
+   :border-color "#bd93f9")
   :units
   (list
    (line-unit)
