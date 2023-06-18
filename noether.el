@@ -161,6 +161,7 @@ side BUF and F to it.  It's simple trick to make small a closure."
          (sep (noether/-view-get view :separator))
          (var (noether/-unit-get unit :var))
          (name (noether/-unit-get unit :name))
+         (view-name (noether/-view-get view :name))
          (start-point (+ point-state (length label)))
          (end-point (+ start-point (noether/-unit-get unit :len 0)))
          ;; Just a small trick to make the resulting closure smaller
@@ -176,11 +177,17 @@ side BUF and F to it.  It's simple trick to make small a closure."
       (funcall init-fn))
 
     (when var
-      (add-variable-watcher var updater))
+      ;; Setup the watcher and the watcher remover
+      (add-variable-watcher var updater)
+      (put view-name :watcher-removers
+           (cons (lambda ()
+                   ;; We will call this function later during
+                   ;; the teardown process
+                   (remove-variable-watcher var updater))
+                 (get view-name :watcher-removers))))
 
-    (let ((name (noether/-view-get view :name)))
-      (put name :updaters
-           (cons updater (get name :updaters))))
+    (put view-name :updaters
+         (cons updater (get view-name :updaters)))
 
     ;; Move the point to the location of the next unit
     (+ end-point (length (or sep "")))))
@@ -217,6 +224,21 @@ E.g. the updaters list."
    (noether/-view-get view :units)
    0))
 
+(defun noether/-teardown-unit (unit)
+  "Tear down the given UNIT by calling the `:deinit' function and removing possible watches."
+  (let ((deinit (noether/-unit-get unit :deinit (lambda ()))))
+    (funcall deinit)))
+
+
+(defun noether/-teardown-views (view)
+  "Tear down the given VIEW to avoid any zombie watcher or timer n stuff."
+  (let ((name (noether/-view-get view :name)))
+    (mapc #'noether/-teardown-unit (noether/-view-get view :units))
+    (mapc #'funcall (get name :watcher-removers))
+    (kill-buffer
+     (noether/-view-get view :buffer (format "*%s*" name)))
+    (funcall (noether/-view-get view :deinit (lambda ())))))
+
 
 (define-minor-mode global-noethor-mode
   "A minor mode that keep tracks of different status blocks.
@@ -224,7 +246,9 @@ It reports them back in a status bar like frame."
   :global t
   :lighter " ST42"
   :keymap (make-sparse-keymap)
-  (mapc #'noether/-setup-views noether/views))
+  (if global-noethor-mode
+      (mapc #'noether/-setup-views noether/views)
+    (mapc #'noether/-teardown-views noether/views)))
 
 
 (provide 'noether)

@@ -44,6 +44,7 @@
   :managed? t
   :buffer "*mainview*"
   :binding (kbd "C-c 1")
+  :separator "|"
   :units
   (list
    (list
@@ -52,8 +53,18 @@
     :len 4
     :init  (lambda ()
              (add-hook 'post-command-hook #'noether/-update-line))
+    :deinit (lambda ()
+              (remove-hook 'post-command-hook #'noether/-update-line))
     :var 'noether/-line
-    :fn #'noether/-line-format)))
+    :fn #'noether/-line-format)
+   ;; (list
+   ;;  :label "T: "
+   ;;  :name :time
+   ;;  :len 4
+   ;;  :init  (lambda ()
+   ;;           (timer )
+   ;;  :fn #'noether/-time-format)
+   ))
 
 
 (setq noether/views (list example-bar))
