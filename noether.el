@@ -27,6 +27,7 @@
 (require 'seq)
 (require 'posframe)
 
+
 (defvar noether/views ()
   "A list of views that noether should manage.
 
@@ -91,6 +92,24 @@ the show function."
        (put ',name :initial-content ,initial-content)
        t)))
 
+
+
+(defmacro defunit (name docs &rest props)
+  "Define a unit with the given NAME, DOCS and a set of PROPS.
+It will define a function with the given NAME that accepts any
+parameter in form of key/values that will override any original
+key/value from the original definition."
+
+  (declare (doc-string 2))
+  (let* ((parsed-body (noether/-extract-props props))
+         ;; For now we don't have any use for the body
+         (_ (car parsed-body))
+         (orig-props (cdr parsed-body)))
+
+    `(defun ,name (&rest f-props)
+       ,docs
+       (append '(:name ,(intern (format ":%s" name)))
+               f-props (list ,@orig-props)))))
 
 
 

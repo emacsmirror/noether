@@ -48,6 +48,31 @@
   "Just return the current time."
   v)
 
+(defunit line-unit
+  "Show the line number."
+  :label "L: "
+  :len 4
+  :init  (lambda ()
+              (add-hook 'post-command-hook #'noether/-update-line))
+  :deinit (lambda ()
+               (remove-hook 'post-command-hook #'noether/-update-line))
+  :var 'noether/-line
+  :fn #'noether/-line-format)
+
+(defunit time-unit
+  "just the time for your bar."
+  :label "T: "
+  :len 8
+  :init  (lambda ()
+           (setq noether/-timer
+                 (run-with-timer 1 1 #'noether/-set-time)))
+  :deinit (lambda ()
+            (when noether/-timer
+              (cancel-timer noether/-timer)))
+
+  :var 'noether/-time
+  :fn #'noether/-time-format)
+
 (defview example-bar
   "Just a test view"
   :managed? t
@@ -56,30 +81,8 @@
   :separator "|"
   :units
   (list
-   (list
-    :label "L: "
-    :name :line
-    :len 4
-    :init  (lambda ()
-             (add-hook 'post-command-hook #'noether/-update-line))
-    :deinit (lambda ()
-              (remove-hook 'post-command-hook #'noether/-update-line))
-    :var 'noether/-line
-    :fn #'noether/-line-format)
-   (list
-    :label "T: "
-    :name :time
-    :len 8
-    :init  (lambda ()
-             (setq noether/-timer
-                   (run-with-timer 1 1 #'noether/-set-time)))
-    :deinit (lambda ()
-              (when noether/-timer
-                (cancel-timer noether/-timer)))
-
-    :var 'noether/-time
-    :fn #'noether/-time-format)
-   ))
+   (line-unit)
+   (time-unit :label "<B>")))
 
 
 (setq noether/views (list example-bar))
