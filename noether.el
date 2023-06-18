@@ -154,7 +154,7 @@ It will pass WATCH-PARAMS to the unit's `:fn'"
   (let ((res (apply f watch-params)))
     (with-current-buffer buf
       (save-excursion
-        (goto-char start-point)
+        (goto-char (+ 1 start-point))
         (delete-char len)
         (insert (truncate-string-to-width res len))))))
 

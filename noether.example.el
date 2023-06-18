@@ -41,7 +41,6 @@
 (defvar noether/-time "")
 (defvar noether/-timer nil)
 (defun noether/-set-time ()
-  (message "here")
   (setq noether/-time (format-time-string "%H:%M:%S")))
 
 (defun noether/-time-format (_ v _ _)
@@ -50,7 +49,7 @@
 
 (defunit line-unit
   "Show the line number."
-  :label "L: "
+  :label "L:"
   :len 4
   :init  (lambda ()
               (add-hook 'post-command-hook #'noether/-update-line))
@@ -61,7 +60,7 @@
 
 (defunit time-unit
   "just the time for your bar."
-  :label "T: "
+  :label "T:"
   :len 8
   :init  (lambda ()
            (setq noether/-timer
@@ -82,7 +81,7 @@
   :units
   (list
    (line-unit)
-   (time-unit :label "<B>")))
+   (time-unit :label "B:")))
 
 
 (setq noether/views (list example-bar))
