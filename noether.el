@@ -66,6 +66,44 @@ It will returen a pair in form of (body . props)."
    (make-string (noether--unit-get unit :len 0) ? )))
 
 
+(defmacro noether-from-modeline (name docs label format-str len)
+  "Define a new unit with the given NAME and doc-string DOCS from the modeline.
+It will use the given LABEL and LEN to pass the to the `defuit' macro.
+
+The most important part of this macro is the FORMAT-STR parameter.  It
+should be a format string that is understandable by `format-modeline'
+function."
+  (declare (doc-string 2) (indent defun))
+  (let ((new-var-sym (gensym)))
+    `(progn
+       (defvar ,(intern (format "%s--internal-state-var" (symbol-name name))))
+
+       (defun ,(intern (format "%s--update-internal-state-var" (symbol-name name))) ()
+         (setq ,(intern (format "%s--internal-state-var" (symbol-name name)))
+               (format-mode-line ,format-str)))
+
+
+       (defun ,(intern (format "%s--format-final-result" (symbol-name name))) (_ ,new-var-sym _ _)
+         "Format the buffer name V."
+         (string-trim ,new-var-sym))
+
+
+       (defunit ,name
+         ,docs
+         :label ,label
+         :len ,len
+         :init (lambda ()
+                 (add-hook 'post-command-hook
+                           #',(intern (format "%s--update-internal-state-var" (symbol-name name)))))
+
+         :deinit (lambda ()
+                   (remove-hook 'post-command-hook
+                                #',(intern (format "%s--update-internal-state-var" (symbol-name name)))))
+
+         :var ',(intern (format "%s--internal-state-var" (symbol-name name)))
+         :fn #',(intern (format "%s--format-final-result" (symbol-name name)))))))
+
+
 (defmacro defview (name docs &rest body)
   "Create a new view with the given NAME with the given DOCS and BODY.
 BODY will be parsed in a way that any starting pair of keyword and value
@@ -272,6 +310,7 @@ It reports them back in a status bar like frame."
   (if noether-global-mode
       (mapc #'noether--setup-views noether-views)
     (mapc #'noether--teardown-views noether-views)))
+
 
 
 (provide 'noether)

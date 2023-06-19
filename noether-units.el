@@ -69,8 +69,7 @@
     (format "%s%s %s"
             (if (buffer-modified-p buf) "*" "-")
             (if (verify-visited-file-modtime buf) "-" "*")
-            (string-trim v)))
-  )
+            (string-trim v))))
 
 
 (defunit buffer-name-unit
@@ -119,6 +118,12 @@ knowing."
   :var 'noether--time
   :fn #'noether--time-format)
 
+;; ============================================================================
+;; Mode name
+;; ============================================================================
+(noether-from-modeline mode-name-unit
+  "Returns the current mode name"
+  "" "%m" 16)
 
 
 (provide 'noether-units)

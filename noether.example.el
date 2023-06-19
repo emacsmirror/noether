@@ -45,7 +45,8 @@
   (list
    (line-unit)
    (time-unit :label "Time:")
-   (buffer-name-unit)))
+   (buffer-name-unit)
+   (mode-name-unit)))
 
 
 (setq noether-views (list example-bar))
