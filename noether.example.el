@@ -36,7 +36,8 @@
   :separator "|"
   :frame
   (list
-   :position '(110 . 120)
+   :position (cons (- (frame-outer-width) 10)
+                   (- (frame-outer-height) 40))
    :border-width 1
    ;; :left-fringe 5
    ;; :right-fringe 5
@@ -48,10 +49,37 @@
    (buffer-name-unit)
    (mode-name-unit)))
 
+(defface noether-active-modeline
+  '((((background light))
+     :background "#55ced1" :height 0.14 :box nil)
+    (t
+     :background "#008b8b" :height 0.14 :box nil))
+  "A new face for modeline in active state."
+  :group 'noether)
+
+(defface noether-inactive-modeline
+  '((((background light))
+     :background "#55ced1" :height 0.14 :box nil)
+    (t
+     :background "#339933" :height 0.14 :box nil))
+  "A new face for modeline in inactive state."
+  :group 'noether)
 
 (setq noether-views (list example-bar))
 
+(add-hook
+ 'noether-global-mode-hook
+ (lambda ()
+   (setq-default mode-line-format "")
+   (let ((face-remaps (default-value 'face-remapping-alist)))
+     (setf (alist-get 'mode-line face-remaps)
+           'noether-active-modeline
+           (alist-get 'mode-line-inactive face-remaps)
+           'noether-inactive-modeline
+           (default-value 'face-remapping-alist) face-remaps))))
+
 (noether-global-mode t)
+
 
 (provide 'noether.example)
 ;;; noether.example.el ends here

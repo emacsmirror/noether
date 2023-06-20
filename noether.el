@@ -312,6 +312,5 @@ It reports them back in a status bar like frame."
     (mapc #'noether--teardown-views noether-views)))
 
 
-
 (provide 'noether)
 ;;; noether.el ends here
