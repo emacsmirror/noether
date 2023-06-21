@@ -126,5 +126,36 @@ knowing."
   "" "%m" 16)
 
 
+;; ============================================================================
+;; Projectile, Project Name
+;; ============================================================================
+
+(defvar noether--project "")
+
+(defun noether--set-project ()
+  "Set the current time to the internal var which is being watched."
+  (message ">> %s" (projectile-project-name))
+  (setq noether--project (projectile-project-name)))
+
+(defun noether--format-project (_ v _ _)
+  "Just return the current time V."
+  v)
+
+
+(defunit projectile-project-unit
+  "just the time for your bar."
+  :label "P:"
+  :len 30
+  :init  (lambda ()
+           (if (and (featurep 'projectile) projectile-mode)
+               (add-hook 'noether-on-buffer-change-hook #'noether--set-project)
+             (warn "Can't find feature `projectile'")))
+  :deinit (lambda ()
+            (remove-hook 'noether-on-buffer-change-hook #'noether--set-project))
+
+  :var 'noether--project
+  :fn #'noether--format-project)
+
+
 (provide 'noether-units)
 ;;; noether-units.el ends here

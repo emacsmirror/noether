@@ -24,7 +24,7 @@
 ;;; Change Log:
 ;;; Code:
 (setq debug-on-error t)
-
+(require 'projectile)
 (require 'noether-units)
 ;;(debug-on-entry 'noether--update-buffer-name)
 
@@ -47,7 +47,8 @@
    (line-unit)
    (time-unit :label "Time:")
    (buffer-name-unit)
-   (mode-name-unit)))
+   (mode-name-unit)
+   (projectile-project-unit)))
 
 (defface noether-active-modeline
   '((((background light))
@@ -78,6 +79,8 @@
            'noether-inactive-modeline
            (default-value 'face-remapping-alist) face-remaps))))
 
+
+(projectile-global-mode t)
 (noether-global-mode t)
 
 

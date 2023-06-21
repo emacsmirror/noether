@@ -28,13 +28,33 @@
 (require 'posframe)
 
 
+;; ============================================================================
+;; Vars
+;; ============================================================================
 (defvar noether-views ()
   "A list of views that noether should manage.
 
 You should adding your views to this var, so noether can activate them
 on demand.")
 
+(defvar noether-on-buffer-change-hook ()
+  "A hook that runs whenever noether detects focus change on buffers.")
 
+
+(defvar noether--frame-defaults
+  (list
+   :min-height 1
+   :min-width 10
+   :position '(0 . 0)
+   :border-width 0
+   :accewpt-focus nil
+   :timeout 10
+   :refresh 1))
+
+
+;; ============================================================================
+;; Macros
+;; ============================================================================
 (defmacro noether--unit-get (unit key &optional default)
   "Return the value of the KEY in UNIT or the DEFAULT value if it doesn't exist."
   `(or (plist-get ,unit ,key) ,default))
@@ -43,27 +63,6 @@ on demand.")
 (defmacro noether--view-get (view key &optional default)
   "Return the value of the KEY in VIEW or the DEFAULT value if it doesn't exist."
   `(or (plist-get ,view ,key) ,default))
-
-
-(defun noether--extract-props (body-list &optional acc)
-  "Extract the props pairs from BODY-LIST with an optional accumulator ACC.
-
-It will returen a pair in form of (body . props)."
-  (let ((k (car body-list))
-        (rest (cdr body-list)))
-
-    (if (and k (keywordp k))
-        (noether--extract-props
-         (cdr rest)
-         (cons (cdr rest) (plist-put (cdr acc) k (car rest))))
-      (cons body-list (cdr acc)))))
-
-
-(defun noether--create-placeholder (unit)
-  "Create a placeholder for UNIT based on its :label and :len."
-  (concat
-   (noether--unit-get unit :label "")
-   (make-string (noether--unit-get unit :len 0) ? )))
 
 
 (defmacro noether-from-modeline (name docs label format-str len)
@@ -130,8 +129,6 @@ the show function."
        (put ',name :initial-content ,initial-content)
        t)))
 
-
-
 (defmacro defunit (name docs &rest props)
   "Define a unit with the given NAME, DOCS and a set of PROPS.
 It will define a function with the given NAME that accepts any
@@ -150,20 +147,36 @@ key/value from the original definition."
                f-props (list ,@orig-props)))))
 
 
-(defvar noether--frame-defaults
-  (list
-   :min-height 1  ;; (noether--view-get view :height 1)
-   :min-width 10  ;; (noether--view-get view :width 10)
-   :position '(0 . 0) ;;(cons (- (frame-outer-width) 10) (- (frame-outer-height) 10))
-   ;;:position (noether--view-get view :position '(0 . 0))
-   ;;:poshandler (noether--view-get view :poshandler)
-   :border-width 0 ;; (noether--view-get view :border 0)
-   ;;:border-color (noether--view-get view :border-color "#eeeefe")
-   :accewpt-focus nil ;;(noether--view-get view :accept-focus)
-   :timeout 10        ;;(noether--view-get view :timeout 5)
-   :refresh 1         ;;(noether--view-get view :refresh 1)))
-   )
-  )
+;; ============================================================================
+;; Helper functions
+;; ============================================================================
+(defun noether--buffer-focus-change-runner (_)
+  "Run a certain hook whenever it detects that focus has change to another buffer.
+Users can add a function to the `noether-on-buffer-change-hook' hook to run
+some arbitary buffer related code when a focus change event happens."
+  (run-hooks 'noether-on-buffer-change-hook))
+
+
+(defun noether--extract-props (body-list &optional acc)
+  "Extract the props pairs from BODY-LIST with an optional accumulator ACC.
+
+It will returen a pair in form of (body . props)."
+  (let ((k (car body-list))
+        (rest (cdr body-list)))
+
+    (if (and k (keywordp k))
+        (noether--extract-props
+         (cdr rest)
+         (cons (cdr rest) (plist-put (cdr acc) k (car rest))))
+      (cons body-list (cdr acc)))))
+
+
+(defun noether--create-placeholder (unit)
+  "Create a placeholder for UNIT based on its :label and :len."
+  (concat
+   (noether--unit-get unit :label "")
+   (make-string (noether--unit-get unit :len 0) ? )))
+
 
 (defun noether-show (view)
   "Draw the given VIEW on the screen."
@@ -285,6 +298,7 @@ E.g. the updaters list."
    (noether--view-get view :units)
    0))
 
+
 (defun noether--teardown-unit (unit)
   "Tear down the given UNIT by calling the `:deinit' function and removing possible watches."
   (let ((deinit (noether--unit-get unit :deinit (lambda ()))))
@@ -301,6 +315,21 @@ E.g. the updaters list."
     (funcall (noether--view-get view :deinit (lambda ())))))
 
 
+
+(defun noether--enable ()
+  "Enable noether by setting up each view and necessary hooks."
+  (add-to-list 'window-buffer-change-functions #'noether--buffer-focus-change-runner)
+  (add-to-list 'window-selection-change-functions #'noether--buffer-focus-change-runner)
+  (mapc #'noether--setup-views noether-views))
+
+
+(defun noether--disable ()
+  "Disable noether and clean up after it."
+  (delete 'window-buffer-change-functions #'noether--buffer-focus-change-runner)
+  (delete 'window-selection-change-functions #'noether--buffer-focus-change-runner)
+  (mapc #'noether--teardown-views noether-views))
+
+
 (define-minor-mode noether-global-mode
   "A minor mode that keep tracks of different status blocks.
 It reports them back in a status bar like frame."
@@ -308,8 +337,8 @@ It reports them back in a status bar like frame."
   :lighter " ST42"
   :keymap (make-sparse-keymap)
   (if noether-global-mode
-      (mapc #'noether--setup-views noether-views)
-    (mapc #'noether--teardown-views noether-views)))
+      (noether--enable)
+    (noether--disable)))
 
 
 (provide 'noether)
