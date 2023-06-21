@@ -134,7 +134,6 @@ knowing."
 
 (defun noether--set-project ()
   "Set the current time to the internal var which is being watched."
-  (message ">> %s" (projectile-project-name))
   (setq noether--project (projectile-project-name)))
 
 (defun noether--format-project (_ v _ _)
