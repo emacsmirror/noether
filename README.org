@@ -1,0 +1,137 @@
+* Noether Mode
+In admiration of [[https://en.wikipedia.org/wiki/Emmy_Noether][Amalie Emmy Noether]].
+
+*Noether Mode* is a global minor mode which manages user defined [[*View][Views]]. Views can be called upon
+using their corresponding function or keybinding. Each of them, may contain one or more [[*Unit][Units]] that
+can automatically update the parent view. As an example, my main use case for *Noether Mode* is a
+replacement for mode line. I defined a View with a bunch of units like, buffer name, project name,
+current time, line/column number of the cursor, and so on. And I used ~C-c 1~ as the keybinding,
+and set the timeout of the view to 10 seconds. Subsequently, I just disabled the mode line since I
+don't use it any more. Whenever I need the view, I just the ~C-c 1~ to call upon it. Noether shows
+it to me for 10 seconds in a position that I set in the view definition.
+
+One can create a view with several resource utilization units to have a status bar.
+
+
+The way *Noether* works is a bit opinionated. While using timers is fine as long as you're OK
+with their performance penalty, *Noether* uses variable watches to update each unit. Moreover,
+unlike mode line, unit length in *Noether* is fixed. Just because I don't like my content
+to jump around in a view.
+
+* View
+Each view represents a frame in Emacs literature (controlled by [[https://github.com/tumashu/posframe][posframe]] under the hood). A view
+can be defined using the =defview= macro like:
+
+#+BEGIN_SRC emacs-lisp
+  (defview example-bar
+  "Just a test view"
+
+  ;; Name of the buffer to be used for the view. It will be managed by Noether
+  :buffer "*mainview*"
+
+  ;; What keybinding will trigger the view
+  :binding (kbd "C-c 1")
+
+  ;; A seperator, to be used between the units
+  :separator "|"
+
+  ;; Any posframe property can be used in the list passed to `:frame'
+  :frame
+  (list
+   :position (cons (- (frame-outer-width) 10)
+                   (- (frame-outer-height) 40))
+   :border-width 1
+   :border-color "#bd93f9")
+
+  ;; A list of units to use in this view
+  :units
+  (list
+   (line-unit)
+
+   ;; A unit's properties can be overriden by passing the key value
+   ;; to the unit's function.
+   (time-unit
+    :label
+    (format "%s " (propertize (all-the-icons-octicon "clock")
+                              'face `(:family ,(all-the-icons-octicon-family) :height 1.0 :weight 'bold)
+                              'display '(raise -0.1))))
+   (buffer-name-unit)
+   (mode-name-unit)
+   (projectile-project-unit)))
+#+END_SRC
+
+* Unit
+Units are like place holders in a view, containing some information that get updated based on an event.
+For example, the current line number in the active buffer can be unit. It gets updated as you move the
+cursor around in the buffer. Or the current active buffer name can be a unit too. It gets updated when
+you switch to another buffer.
+
+In general, a unit is just a data structure with few properties:
+- =:label= An optional string to be used as a label for the unit
+- =:len= A mandatory integer that defines the maximum number of characters, that the unit will
+  occupie in the view. *Noether* uses this integer to calculate the position for the next unit.
+
+- =:init= A function that will be called by *Noether* when setting up a view. Each unit can set up
+  whatever that it might need to operated in this function. For example, any hook or timer.
+
+- =:deinit= A function that *Noether* will call during the tear down process to let each
+  unit clean up after itself before deactivating the *Noether Mode*. If you're setting
+  a hook function or a timer, this is the place to remove them.
+
+- =:var= *Noether* will setup a watcher for the variable given as the value to this property.
+  The watcher will monitor the variable and call the =:fn= function whenever it detect a change
+  in the value of the variable. So, when you want to update the unit in the view, just set
+  the variable to a new value.
+
+- =:fn= This function will be called whenever the variable given as the value for the =:var= key
+  changes. This function will be called with the following arguments
+  =(SYMBOL NEWVAL OPERATION WHERE)=. Most of the time, you just need the =NEWVAL= parameter.
+
+
+While *Noether* comes with a few units, you can define you own like:
+
+#+BEGIN_SRC emacs-lisp
+  ;; The variable that we want to watch
+  (defvar noether--project "")
+
+  ;; A function to set the watched
+  (defun noether--set-project ()
+    "Set the current project name using projectile."
+    (setq noether--project (projectile-project-name)))
+
+  (defun noether--format-project (_ new-val _ _)
+    "Just return the new project name that is set in `noether--project'."
+
+    ;; We can format the project name however want as long as it size is within
+    ;; the provided len for the unit below
+    new-val)
+
+
+  ;; The unit definition of the unit
+  (defunit projectile-project-unit
+    "Show the current project name in the view."
+    ;; The format of this unit would be like: "P:                              "
+    ;; the free space will be filled with the project name
+    :label "P:"
+    ;; The max len for the project name, longer names will be truncated
+    :len 30
+
+    ;; We will user the `noether-on-buffer-change-hook' hook (provided by Noether) to
+    ;; use the `noether--set-project' function (from above) to set the watched var
+    ;; `noether--project' to the current project name whenever user's focus changes
+    ;; to another buffer.
+    :init  (lambda ()
+             (if (and (featurep 'projectile) projectile-mode)
+                 (add-hook 'noether-on-buffer-change-hook #'noether--set-project)
+               (warn "Can't find feature `projectile'")))
+
+    ;; When deactivating, remove the hook
+    :deinit (lambda ()
+              (remove-hook 'noether-on-buffer-change-hook #'noether--set-project))
+
+    ;; Noether will watch the `noether--project' var
+    :var 'noether--project
+
+    ;; The function to call whenever `noether--project' changes
+    :fn #'noether--format-project)
+#+END_SRC

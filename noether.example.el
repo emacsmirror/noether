@@ -25,6 +25,7 @@
 ;;; Code:
 (setq debug-on-error t)
 (require 'projectile)
+(require 'all-the-icons)
 (require 'noether-units)
 ;;(debug-on-entry 'noether--update-buffer-name)
 
@@ -45,7 +46,11 @@
   :units
   (list
    (line-unit)
-   (time-unit :label "Time:")
+   (time-unit
+    :label
+    (format "%s " (propertize (all-the-icons-octicon "clock")
+                              'face `(:family ,(all-the-icons-octicon-family) :height 1.0 :weight 'bold)
+                              'display '(raise -0.1))))
    (buffer-name-unit)
    (mode-name-unit)
    (projectile-project-unit)))
@@ -58,6 +63,7 @@
   "A new face for modeline in active state."
   :group 'noether)
 
+
 (defface noether-inactive-modeline
   '((((background light))
      :background "#55ced1" :height 0.14 :box nil)
@@ -65,6 +71,7 @@
      :background "#339933" :height 0.14 :box nil))
   "A new face for modeline in inactive state."
   :group 'noether)
+
 
 (setq noether-views (list example-bar))
 
