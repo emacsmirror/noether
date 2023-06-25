@@ -4,7 +4,8 @@ pipeline:
     image: debian:12-slim
     commands:
       - apt update
-      - apt install -y emacs curl
-      - curl -fsSL https://raw.github.com/doublep/eldev/master/webinstall/github-eldev | sh
+      - apt install -y emacs-nox curl
+      - curl -fsSL https://raw.github.com/doublep/eldev/master/webinstall/github-eldev -O install.sh
+      - sh install.sh
       - eldev lint
       - eldev compile
