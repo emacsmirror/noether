@@ -1,0 +1,9 @@
+
+pipeline:
+  Build:
+    image: alpine:latest
+    commands:
+      - apk add emacs curl
+      - curl -fsSL https://raw.github.com/doublep/eldev/master/webinstall/github-eldev | sh
+      - eldev lint
+      - eldev compile

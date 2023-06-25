@@ -95,7 +95,6 @@ function."
          "Format the buffer name V."
          (string-trim ,new-var-sym))
 
-
        (noether-defunit ,name
          ,docs
          :label ,label
