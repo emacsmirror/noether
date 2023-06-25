@@ -1,9 +1,10 @@
 
 pipeline:
   Build:
-    image: alpine:latest
+    image: debian:slim
     commands:
-      - apk add emacs curl
+      - apt update
+      - apt install -y emacs curl
       - curl -fsSL https://raw.github.com/doublep/eldev/master/webinstall/github-eldev | sh
       - eldev lint
       - eldev compile
