@@ -8,4 +8,4 @@ pipeline:
       - curl -fsSL https://raw.github.com/doublep/eldev/master/bin/eldev > /usr/bin/eldev
       - chmod a+x /usr/bin/eldev
       - eldev lint
-      - eldev compile noether.el noether-units.el
+      - eldev compile
