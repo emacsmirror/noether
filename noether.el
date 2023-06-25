@@ -116,7 +116,7 @@ function."
 BODY will be parsed in a way that any starting pair of keyword and value
 will be used as the view properties and the rest will be the body of
 the show function."
-  (declare (doc-string 2))
+  (declare (doc-string 2) (indent defun))
   (let* ((parsed-body (noether--extract-props body))
          (show-body (car parsed-body))
          (props (cdr parsed-body))

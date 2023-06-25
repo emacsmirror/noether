@@ -27,6 +27,7 @@
 (require 'projectile)
 (require 'all-the-icons)
 (require 'noether-units)
+(require 'noether-views)
 ;;(debug-on-entry 'noether--update-buffer-name)
 
 (noether-defview example-bar
@@ -73,7 +74,7 @@
   :group 'noether)
 
 
-(setq noether-views (list example-bar))
+(setq noether-views (list noether-minimal-mode-line))
 
 (add-hook
  'noether-global-mode-hook

@@ -141,16 +141,16 @@ Emacs knowing."
 (defvar noether--project "")
 
 (defun noether--set-project ()
-  "Set the current time to the internal var which is being watched."
+  "Set the current project for the current buffer."
   (setq noether--project (projectile-project-name)))
 
 (defun noether--format-project (_ v _ _)
-  "Just return the current time V."
+  "Just return the current project V."
   v)
 
 
 (noether-defunit projectile-project-unit
-  "just the time for your bar."
+  "Show the current project name for the current buffer"
   :label "P:"
   :len 30
   :init  (lambda ()
@@ -162,6 +162,34 @@ Emacs knowing."
 
   :var 'noether--project
   :fn #'noether--format-project)
+
+;; ============================================================================
+;; Git branch
+;; ============================================================================
+
+(defvar noether--git-branch "")
+
+(defun noether--set-git-branch ()
+  "Set the branch name for the current buffer."
+  (setq noether--git-branch
+        (emacs-repository-branch-git (file-name-directory (buffer-file-name)))))
+
+(defun noether--format-git-branch (_ v _ _)
+  "Just return the branch name V}."
+  v)
+
+
+(noether-defunit git-branch-unit
+  "Show the git branch for the current buffer."
+  :label "B:"
+  :len 40
+  :init  (lambda ()
+           (add-hook 'noether-on-buffer-change-hook #'noether--set-git-branch))
+  :deinit (lambda ()
+            (remove-hook 'noether-on-buffer-change-hook #'noether--set-git-branch))
+
+  :var 'noether--git-branch
+  :fn #'noether--format-git-branch)
 
 
 (provide 'noether-units)
