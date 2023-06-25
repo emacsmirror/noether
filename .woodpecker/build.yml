@@ -6,6 +6,6 @@ pipeline:
       - apt update
       - apt install -y emacs-nox curl
       - curl -fsSL https://raw.github.com/doublep/eldev/master/bin/eldev > /usr/bin/eldev
-      - chmod a+x /user/bin/eldev
+      - chmod a+x /usr/bin/eldev
       - eldev lint
       - eldev compile
