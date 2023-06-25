@@ -25,6 +25,14 @@
 ;;; Code:
 (require 'noether)
 
+(eval-when-compile
+  (defvar line-unit)
+  (defvar buffer-name-unit)
+  (defvar time-unit)
+  (defvar mode-name-unit)
+  (defvar projectile-project-unit)
+  (declare-function projectile-project-name "projectile-project-name" ()))
+
 ;; ============================================================================
 ;; line number indicator
 ;; ============================================================================
@@ -41,7 +49,7 @@
   (format "%4d:%4d" (car v) (cadr v)))
 
 
-(defunit line-unit
+(noether-defunit line-unit
   "Show the line number."
   :label (propertize "L" 'face 'highlight)
   :len 9
@@ -72,13 +80,13 @@
             (string-trim v))))
 
 
-(defunit buffer-name-unit
+(noether-defunit buffer-name-unit
   "Show the current buffer name in the viwe.
 
 The format of the unit is like: `(*|-)(*|-)BUFFER-NAME'.
 The first char will be an asterisk if the buffer contains unsaved changes and
-the second char will be an asterisk if the file changed on the disk without Emacs
-knowing."
+the second char will be an asterisk if the file changed on the disk without
+Emacs knowing."
   :label ""
   :len 32
   :init (lambda ()
@@ -104,7 +112,7 @@ knowing."
   v)
 
 
-(defunit time-unit
+(noether-defunit time-unit
   "just the time for your bar."
   :label "T:"
   :len 8
@@ -141,12 +149,12 @@ knowing."
   v)
 
 
-(defunit projectile-project-unit
+(noether-defunit projectile-project-unit
   "just the time for your bar."
   :label "P:"
   :len 30
   :init  (lambda ()
-           (if (and (featurep 'projectile) projectile-mode)
+           (if (and (featurep 'projectile) (boundp 'projectile-mode))
                (add-hook 'noether-on-buffer-change-hook #'noether--set-project)
              (warn "Can't find feature `projectile'")))
   :deinit (lambda ()

@@ -29,10 +29,16 @@
 (require 'seq)
 (require 'posframe)
 
+(defgroup noether nil
+  "The customization group for the noether-mode."
+  :group 'convenience)
 
 ;; ============================================================================
 ;; Vars
 ;; ============================================================================
+(eval-when-compile
+  (defvar noether-global-mode-map))
+
 (defvar noether-views ()
   "A list of views that noether should manage.
 
@@ -90,7 +96,7 @@ function."
          (string-trim ,new-var-sym))
 
 
-       (defunit ,name
+       (noether-defunit ,name
          ,docs
          :label ,label
          :len ,len
@@ -214,7 +220,7 @@ It will pass WATCH-PARAMS to the unit's `:fn'"
           (replace-region-contents
            (+ 1 start-point)
            (+ 1 start-point len)
-           (lambda () (string-pad (truncate-string-to-width res len) len))))))))
+           (lambda () (string-pad txt len))))))))
 
 
 (defun noether--make-updater (buf f start-point len)
@@ -303,7 +309,8 @@ E.g. the updaters list."
 
 
 (defun noether--teardown-unit (unit)
-  "Tear down the given UNIT by calling the `:deinit' function and removing possible watches."
+  "Tear down the given UNIT by calling the `:deinit' fn.
+It removes any possible watch function."
   (let ((deinit (noether--unit-get unit :deinit (lambda ()))))
     (funcall deinit)))
 
@@ -338,7 +345,8 @@ E.g. the updaters list."
   "A minor mode that keep tracks of different status blocks.
 It reports them back in a status bar like frame."
   :global t
-  :lighter " ST42"
+  :lighter " N"
+  :group 'noether
   :keymap (make-sparse-keymap)
   (if noether-global-mode
       (noether--enable)
