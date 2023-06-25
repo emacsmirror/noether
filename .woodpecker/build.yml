@@ -1,7 +1,7 @@
 
 pipeline:
   Build:
-    image: debian:slim
+    image: debian:12-slim
     commands:
       - apt update
       - apt install -y emacs curl
