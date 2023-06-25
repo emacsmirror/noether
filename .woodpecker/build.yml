@@ -5,7 +5,8 @@ pipeline:
     commands:
       - apt update
       - apt install -y emacs-nox curl
-      - curl -fsSL https://raw.github.com/doublep/eldev/master/webinstall/github-eldev -O install.sh
-      - sh install.sh
+      - mkdir -p ~/.local/bin
+      - curl -fsSL https://raw.github.com/doublep/eldev/master/webinstall/github-eldev | sh
+      - export PATH=~/.local/bin:$PATH
       - eldev lint
       - eldev compile
