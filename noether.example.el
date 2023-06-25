@@ -29,7 +29,7 @@
 (require 'noether-units)
 ;;(debug-on-entry 'noether--update-buffer-name)
 
-(defview example-bar
+(noether-defview example-bar
   "Just a test view"
   :managed? t
   :buffer "*mainview*"

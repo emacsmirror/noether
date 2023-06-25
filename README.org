@@ -20,10 +20,10 @@ to jump around in a view.
 
 * View
 Each view represents a frame in Emacs literature (controlled by [[https://github.com/tumashu/posframe][posframe]] under the hood). A view
-can be defined using the =defview= macro like:
+can be defined using the =noether-defview= macro like:
 
 #+BEGIN_SRC emacs-lisp
-  (defview example-bar
+  (noether-defview example-bar
   "Just a test view"
 
   ;; Name of the buffer to be used for the view. It will be managed by Noether
@@ -108,7 +108,7 @@ While *Noether* comes with a few units, you can define you own like:
 
 
   ;; The unit definition of the unit
-  (defunit projectile-project-unit
+  (noether-defunit projectile-project-unit
     "Show the current project name in the view."
     ;; The format of this unit would be like: "P:                              "
     ;; the free space will be filled with the project name

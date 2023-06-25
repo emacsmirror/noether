@@ -6,7 +6,7 @@
 ;; URL: https://devheroes.codes/lxsameer/noether
 ;; Version: 0.1.0
 ;; Keywords: frames, modeline
-;; Package-Requires: (posframe (emacs "26.1"))
+;; Package-Requires: ((posframe "1.4.2") (emacs "27.1"))
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;
 ;;; Commentary:
+;; A simple frame manager framework that can be utilized to create a mode line
+;; alternative.
 ;;; Change Log:
 ;;; Code:
 (require 'seq)
@@ -36,6 +38,7 @@
 
 You should adding your views to this var, so noether can activate them
 on demand.")
+
 
 (defvar noether-on-buffer-change-hook ()
   "A hook that runs whenever noether detects focus change on buffers.")
@@ -103,7 +106,7 @@ function."
          :fn #',(intern (format "%s--format-final-result" (symbol-name name)))))))
 
 
-(defmacro defview (name docs &rest body)
+(defmacro noether-defview (name docs &rest body)
   "Create a new view with the given NAME with the given DOCS and BODY.
 BODY will be parsed in a way that any starting pair of keyword and value
 will be used as the view properties and the rest will be the body of
@@ -129,7 +132,7 @@ the show function."
        (put ',name :initial-content ,initial-content)
        t)))
 
-(defmacro defunit (name docs &rest props)
+(defmacro noether-defunit (name docs &rest props)
   "Define a unit with the given NAME, DOCS and a set of PROPS.
 It will define a function with the given NAME that accepts any
 parameter in form of key/values that will override any original
@@ -330,6 +333,7 @@ E.g. the updaters list."
   (mapc #'noether--teardown-views noether-views))
 
 
+;;;###autoload
 (define-minor-mode noether-global-mode
   "A minor mode that keep tracks of different status blocks.
 It reports them back in a status bar like frame."
