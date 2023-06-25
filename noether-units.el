@@ -41,7 +41,7 @@
 (defun noether--update-line ()
   "Update the `noether--line' variable after each command."
   ;; TODO: calling `line-number-at-pos' is not performant
-  ;; replace this with a better alt
+  ;; replace it with the modeline version
   (setq noether--line (list (line-number-at-pos) (current-column))))
 
 (defun noether--line-format (_ v _ _)
@@ -137,7 +137,6 @@ Emacs knowing."
 ;; ============================================================================
 ;; Projectile, Project Name
 ;; ============================================================================
-
 (defvar noether--project "")
 
 (defun noether--set-project ()
@@ -166,13 +165,13 @@ Emacs knowing."
 ;; ============================================================================
 ;; Git branch
 ;; ============================================================================
-
 (defvar noether--git-branch "")
 
 (defun noether--set-git-branch ()
   "Set the branch name for the current buffer."
-  (setq noether--git-branch
-        (emacs-repository-branch-git (file-name-directory (buffer-file-name)))))
+  (let ((dir (file-name-directory (buffer-file-name))))
+    (setq noether--git-branch
+          (string-trim (shell-command-to-string (format "git -C %s branch --show-current" dir))))))
 
 (defun noether--format-git-branch (_ v _ _)
   "Just return the branch name V}."
