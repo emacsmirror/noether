@@ -61,7 +61,7 @@ can be defined using the =defview= macro like:
 #+END_SRC
 
 * Unit
-Units are like place holders in a view, containing some information that get updated based on an event.
+Units are like placeholders in a view, containing some information that is updated based on an event.
 For example, the current line number in the active buffer can be unit. It gets updated as you move the
 cursor around in the buffer. Or the current active buffer name can be a unit too. It gets updated when
 you switch to another buffer.
@@ -72,14 +72,14 @@ In general, a unit is just a data structure with few properties:
   occupie in the view. *Noether* uses this integer to calculate the position for the next unit.
 
 - =:init= A function that will be called by *Noether* when setting up a view. Each unit can set up
-  whatever that it might need to operated in this function. For example, any hook or timer.
+  whatever that, it might need to be operated in this function. For example, any hook or timer.
 
 - =:deinit= A function that *Noether* will call during the tear down process to let each
-  unit clean up after itself before deactivating the *Noether Mode*. If you're setting
+  unit cleans up after itself before deactivating the *Noether Mode*. If you're setting
   a hook function or a timer, this is the place to remove them.
 
 - =:var= *Noether* will setup a watcher for the variable given as the value to this property.
-  The watcher will monitor the variable and call the =:fn= function whenever it detect a change
+  The watcher will monitor the variable and call the =:fn= function whenever it detects a change
   in the value of the variable. So, when you want to update the unit in the view, just set
   the variable to a new value.
 
