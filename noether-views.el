@@ -44,12 +44,31 @@
 
   :units
   (list
-   (line-unit :label "")
+   ;; (line-unit :label "")
    (buffer-name-unit :label "B: ")
    (mode-name-unit :label "M: ")
    (projectile-project-unit :label "P: ")
    (git-branch-unit :label "Br: ")))
 
+
+(noether-defview noether-minimal-location
+  "A super simple bar containing the line number and column number that
+Appears on the center of the current window."
+  :managed? t
+  :buffer "*location*"
+  :binding (kbd "C-c 2")
+  :separator "|"
+  :frame
+  (list
+   :position nil
+   :poshandler #'posframe-poshandler-window-center
+   :border-width 1
+   :timeout 5
+   :border-color "#bd93f9")
+
+  :units
+  (list
+   (line-unit :label "")))
 
 
 (provide 'noether-views)
