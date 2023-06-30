@@ -137,11 +137,13 @@ Emacs knowing."
 ;; ============================================================================
 ;; Projectile, Project Name
 ;; ============================================================================
-(defvar noether--project "")
+(defvar noether--project nil)
 
 (defun noether--set-project ()
   "Set the current project for the current buffer."
-  (setq noether--project (projectile-project-name)))
+  (let ((p (projectile-project-name)))
+    (when p
+      (setq noether--project p))))
 
 (defun noether--format-project (_ v _ _)
   "Just return the current project V."
@@ -169,9 +171,10 @@ Emacs knowing."
 
 (defun noether--set-git-branch ()
   "Set the branch name for the current buffer."
-  (let ((dir (file-name-directory (buffer-file-name))))
-    (setq noether--git-branch
-          (string-trim (shell-command-to-string (format "git -C %s branch --show-current" dir))))))
+  (when (buffer-file-name)
+   (let ((dir (file-name-directory (buffer-file-name))))
+     (setq noether--git-branch
+           (string-trim (shell-command-to-string (format "git -C %s branch --show-current" dir)))))))
 
 (defun noether--format-git-branch (_ v _ _)
   "Just return the branch name V}."
