@@ -334,8 +334,8 @@ It removes any possible watch function."
 
 (defun noether--disable ()
   "Disable noether and clean up after it."
-  (delete 'window-buffer-change-functions #'noether--buffer-focus-change-runner)
-  (delete 'window-selection-change-functions #'noether--buffer-focus-change-runner)
+  (delete #'noether--buffer-focus-change-runner window-buffer-change-functions)
+  (delete #'noether--buffer-focus-change-runner window-selection-change-functions)
   (mapc #'noether--teardown-views noether-views))
 
 

@@ -71,5 +71,28 @@ Appears on the center of the current window."
    (line-unit :label "")))
 
 
+(noether-defview noether-minimal-exwm
+  "A super simple bar containing the line number and column number that
+Appears on the center of the current window."
+  :managed? t
+  :buffer "*exwm-status*"
+  :binding (kbd "C-c 3")
+  :separator "|"
+  :frame
+  (list
+   ;; Such a big numbers for X and Y will cause the frame to appear on the
+   ;; bottom right corner and covering the minibuffer
+   :position '(10000 . 10000)
+   :border-width 0
+   :timeout 5
+   :border-color "#bd93f9")
+
+  :units
+  (list
+   (exwm-input-mode-unit :label "")
+   (buffer-name-unit :label "")
+   (time-unit :label "")))
+
+
 (provide 'noether-views)
 ;;; noether-views.el ends here

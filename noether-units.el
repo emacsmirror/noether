@@ -193,6 +193,34 @@ Emacs knowing."
   :var 'noether--git-branch
   :fn #'noether--format-git-branch)
 
+;; ============================================================================
+;; Exwm input mode
+;; ============================================================================
+(defvar noether--exwm-input-mode nil)
+
+(defun noether--set-exwm-input-mode ()
+  "Set the EXWM input mode for the current buffer."
+  (message "AA %s" exwm--input-mode)
+  (setq noether--exwm-input-mode (format "%s" exwm--input-mode)))
+
+(defun noether--format-exwm-input-mode (_ v _ _)
+  "Just return the input mode name V."
+  v)
+
+
+(noether-defunit exwm-input-mode-unit
+  "Show the input mode of EXWM for the current buffer."
+  :label "I:"
+  :len 4
+  :init  (lambda ()
+           (when (featurep 'exwm)
+             (add-hook 'noether-on-buffer-change-hook #'noether--set-exwm-input-mode)))
+  :deinit (lambda ()
+            (when (featurep 'exwm)
+              (remove-hook 'noether-on-buffer-change-hook #'noether--set-exwm-input-mode)))
+  :var 'noether--exwm-input-mode
+  :fn #'noether--format-exwm-input-mode)
+
 
 (provide 'noether-units)
 ;;; noether-units.el ends here

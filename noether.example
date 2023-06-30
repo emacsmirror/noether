@@ -74,7 +74,7 @@
   :group 'noether)
 
 
-(setq noether-views (list noether-minimal-mode-line noether-minimal-location))
+(setq noether-views (list noether-minimal-mode-line noether-minimal-location noether-minimal-exwm))
 
 (add-hook
  'noether-global-mode-hook
