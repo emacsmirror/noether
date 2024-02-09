@@ -200,7 +200,6 @@ Emacs knowing."
 
 (defun noether--set-exwm-input-mode ()
   "Set the EXWM input mode for the current buffer."
-  (message "AA %s" exwm--input-mode)
   (setq noether--exwm-input-mode (format "%s" exwm--input-mode)))
 
 (defun noether--format-exwm-input-mode (_ v _ _)
