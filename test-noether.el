@@ -33,7 +33,6 @@
 (require 'noether)
 (require 'noether-units)
 (require 'noether-views)
-(require 'nerd-icons)
 (require 'projectile)
 
 (noether-defview mode-line
