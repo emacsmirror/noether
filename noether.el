@@ -57,7 +57,7 @@ on demand.")
    :position '(0 . 0)
    :border-width 0
    :accewpt-focus nil
-   :timeout 10
+   ;;:timeout 10
    :refresh 1))
 
 
@@ -151,7 +151,7 @@ key/value from the original definition."
 
     `(defun ,name (&rest f-props)
        ,docs
-       (append '(:name ,(intern (format ":%s" name)))
+       (append '(:name ,(intern (format ":%s" (symbol-name name))))
                f-props (list ,@orig-props)))))
 
 
@@ -289,11 +289,15 @@ E.g. the updaters list."
   (noether--reset-view-state view)
 
   (let ((name (noether--view-get view :name))
-        (binding (noether--view-get view :binding)))
+        (binding (noether--view-get view :binding))
+        (visible (noether--view-get view :visible?)))
 
     (when (not (null binding))
       (define-key noether-global-mode-map binding
         (lambda () (interactive) (noether-show view))))
+
+    (when visible
+      (noether-show view))
 
     (with-current-buffer (get-buffer-create (noether--view-get view :buffer (format "*%s*" name)))
       (erase-buffer)

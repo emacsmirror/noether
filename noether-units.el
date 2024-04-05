@@ -174,7 +174,7 @@ Emacs knowing."
   (when (buffer-file-name)
    (let ((dir (file-name-directory (buffer-file-name))))
      (setq noether--git-branch
-           (string-trim (shell-command-to-string (format "git -C %s branch --show-current" dir)))))))
+           (string-trim (shell-command-to-string (format "git -C %s branch --show-current 2> /dev/null" dir)))))))
 
 (defun noether--format-git-branch (_ v _ _)
   "Just return the branch name V}."
