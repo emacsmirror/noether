@@ -33,7 +33,6 @@
 (require 'noether)
 (require 'noether-units)
 (require 'noether-views)
-(require 'projectile)
 
 (noether-defview mode-line
   "A simple and minimalist mode-line like status bar"
@@ -55,14 +54,11 @@
   (list
    (line-unit :label "")
    (buffer-name-unit :label "B: ")
-   (mode-name-unit :label "M: ")
-   (projectile-project-unit :label "P: ")
-   (git-branch-unit :label "Br: ")
-   ))
-(setq noether-views (list noether-minimal-mode-line noether-minimal-location noether-minimal-exwm mode-line))
+   (mode-name-unit :label "M: ")))
 
 
-(projectile-global-mode t)
+(setq noether-views (list mode-line))
+
 (noether-global-mode t)
 
 
