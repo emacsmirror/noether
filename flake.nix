@@ -46,7 +46,7 @@
 
         noether = pkgs.emacsPackages.trivialBuild {
           pname = "noether-mode";
-          version = "0.1.4";
+          version = "0.1.5";
           buildInputs = [ pkgs.emacsPackages.posframe ];
 
           src = ./.;

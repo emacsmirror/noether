@@ -143,7 +143,7 @@ It will define a function with the given NAME that accepts any
 parameter in form of key/values that will override any original
 key/value from the original definition."
 
-  (declare (doc-string 2))
+  (declare (doc-string 2) (indent defun))
   (let* ((parsed-body (noether--extract-props props))
          ;; For now we don't have any use for the body
          (_ (car parsed-body))
