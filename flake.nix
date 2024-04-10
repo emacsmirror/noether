@@ -25,56 +25,63 @@
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/442d407992384ed9c0e6d352de75b69079904e4e";
   inputs.emacs-overlay.url = "github:nix-community/emacs-overlay/0f7f3b39157419f3035a2dad39fbaf8a4ba0448d";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs.flake-parts.url = "github:hercules-ci/flake-parts";
 
-  outputs = { self, nixpkgs, ... }@inputs:
-    inputs.flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [ inputs.emacs-overlay.overlays.package ];
-        };
+  outputs = { self, nixpkgs, flake-parts, ... }@inputs: flake-parts.lib.mkFlake { inherit inputs; } (
+    {
+      systems = [
+        "aarch64-darwin"
+        "riscv64-linux"
+        "riscv32-linux"
+        "x86_64-linux"
+        "x86_64-windows"
+      ];
+
+      perSystem = { config, pkgs, system, ... }:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ inputs.emacs-overlay.overlays.package ];
+          };
+          emacs = pkgs.emacs29.override {
+          } // (pkgs.lib.optionalAttrs (pkgs.stdenv.isLinux) {
+            # Gtk causes a flickering issue on WM mode
+            withGTK3 = false;
+            toolkit = "lucid";
+          });
 
 
-        emacs = pkgs.emacs29.override {
-        } // (pkgs.lib.optionalAttrs (pkgs.stdenv.isLinux) {
-          # Gtk causes a flickering issue on WM mode
-          withGTK3 = false;
-          toolkit = "lucid";
-        });
+          noether = pkgs.emacsPackages.trivialBuild {
+            pname = "noether-mode";
+            version = "0.1.5";
+            buildInputs = [ pkgs.emacsPackages.posframe ];
 
+            src = ./.;
+          };
 
-        noether = pkgs.emacsPackages.trivialBuild {
-          pname = "noether-mode";
-          version = "0.1.5";
-          buildInputs = [ pkgs.emacsPackages.posframe ];
+          emacsPkgs = (pkgs.emacsPackagesFor emacs).withPackages (epkgs: [
+            epkgs.projectile
+            epkgs.posframe
+            noether
+          ]);
 
-          src = ./.;
-        };
+          test-noether = pkgs.writeShellApplication {
+            name = "test-noether";
+            runtimeInputs = [ emacsPkgs ];
 
-        emacsPkgs = (pkgs.emacsPackagesFor emacs).withPackages (epkgs: [
-          epkgs.projectile
-          epkgs.posframe
-          noether
-        ]);
-
-        test-noether = pkgs.writeShellApplication {
-          name = "test-noether";
-          runtimeInputs = [ emacsPkgs ];
-
-          text = ''
+            text = ''
           ${emacsPkgs}/bin/emacs -Q -l ./test-noether.el "$@"
           '';
+          };
+
+        in {
+          packages.default = noether;
+          devShells.default = pkgs.mkShell {
+            nativeBuildInputs = [ noether emacsPkgs test-noether ];
+            buildInputs = [ noether emacsPkgs ];
+          };
+
         };
 
-      in {
-        packages.default = noether;
-        packages.${system}.default = noether;
-
-        devShells.default = pkgs.mkShell {
-          nativeBuildInputs = [ noether emacsPkgs test-noether ];
-          buildInputs = [ noether emacsPkgs ];
-        };
-      }
-    );
+    });
 }
