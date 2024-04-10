@@ -318,6 +318,14 @@ It removes any possible watch function."
     (funcall deinit)))
 
 
+(defun noether-refresh (&optional _)
+  "Refresh views.
+We need to call this function when ever Emacs resized
+or the font size changed."
+  (interactive)
+  (mapc #'noether--setup-views noether-views))
+
+
 (defun noether--teardown-views (view)
   "Tear down the given VIEW to avoid any zombie watcher or timer n stuff."
   (let ((name (noether--view-get view :name)))
@@ -333,13 +341,19 @@ It removes any possible watch function."
   "Enable noether by setting up each view and necessary hooks."
   (add-to-list 'window-buffer-change-functions #'noether--buffer-focus-change-runner)
   (add-to-list 'window-selection-change-functions #'noether--buffer-focus-change-runner)
-  (mapc #'noether--setup-views noether-views))
+  (add-to-list 'window-size-change-functions #'noether-refresh)
+
+  ;; Technically the argument to the refresh function should be a `frame'
+  ;; but since we are not using it and we have to keep it cuz
+  ;; `window-size-change-functions' expects it, We just pass true.
+  (noether-refresh t))
 
 
 (defun noether--disable ()
   "Disable noether and clean up after it."
   (delete #'noether--buffer-focus-change-runner window-buffer-change-functions)
   (delete #'noether--buffer-focus-change-runner window-selection-change-functions)
+  (delete #'noether-refresh window-size-change-functions)
   (mapc #'noether--teardown-views noether-views))
 
 

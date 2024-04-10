@@ -34,6 +34,11 @@
 (require 'noether-units)
 (require 'noether-views)
 
+(defun noether--bottom-right (info)
+  (cons (- (frame-outer-width) 10)
+        (- (frame-outer-height) 40))
+  )
+
 (noether-defview mode-line
   "A simple and minimalist mode-line like status bar"
   :managed? t
@@ -44,10 +49,11 @@
   :visible? t
   :frame
   (list
-   :position (cons (- (frame-outer-width) 10)
-                   (- (frame-outer-height) 40))
-   ;;:poshandler #'posframe-poshandler-frame-top-center
+   ;; :position (cons (- (frame-outer-width) 10)
+   ;;                 (- (frame-outer-height) 40))
+   :poshandler #'noether--bottom-right
    :border-width 0
+
    :border-color "#bd93f9")
 
   :units

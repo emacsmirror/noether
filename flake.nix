@@ -53,7 +53,7 @@
 
           noether = pkgs.emacsPackages.trivialBuild {
             pname = "noether-mode";
-            version = "0.1.6";
+            version = "0.1.7";
             buildInputs = [ pkgs.emacsPackages.posframe ];
 
             src = ./.;
@@ -79,6 +79,11 @@
           devShells.default = pkgs.mkShell {
             nativeBuildInputs = [ noether emacsPkgs test-noether ];
             buildInputs = [ noether emacsPkgs ];
+          };
+
+          apps.default = {
+            type = "app";
+            program = "${test-noether}/bin/test-noether";
           };
 
         };

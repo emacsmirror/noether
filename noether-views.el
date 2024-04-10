@@ -28,7 +28,6 @@
 (require 'noether)
 (require 'noether-units)
 
-
 (noether-defview noether-minimal-mode-line
   "A simple and minimalist mode-line like status bar"
   :managed? t
