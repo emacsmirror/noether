@@ -1,6 +1,6 @@
 # noether.el --- A modeline which plays hide and seek  -*- lexical-binding: t; -*-
 #
-# Copyright (c) 2023 Sameer Rahmani <lxsameer@gnu.org>
+# Copyright (c) 2023-2024 Sameer Rahmani <lxsameer@gnu.org>
 #
 # Author: Sameer Rahmani <lxsameer@gnu.org>
 # URL: https://devheroes.codes/lxsameer/noether
@@ -53,7 +53,7 @@
 
           noether = pkgs.emacsPackages.trivialBuild {
             pname = "noether-mode";
-            version = "0.1.5";
+            version = "0.1.6";
             buildInputs = [ pkgs.emacsPackages.posframe ];
 
             src = ./.;

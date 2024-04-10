@@ -1,6 +1,6 @@
 ;;; noether.el --- A modeline which plays hide and seek  -*- lexical-binding: t; -*-
 ;;
-;; Copyright (c) 2023 Sameer Rahmani <lxsameer@gnu.org>
+;; Copyright (c) 2023-2024 Sameer Rahmani <lxsameer@gnu.org>
 ;;
 ;; Author: Sameer Rahmani <lxsameer@gnu.org>
 ;; URL: https://devheroes.codes/lxsameer/noether
@@ -69,29 +69,6 @@ Appears on the center of the current window."
   :units
   (list
    (line-unit :label "")))
-
-
-(noether-defview noether-minimal-exwm
-  "A super simple bar containing the line number and column number that
-Appears on the center of the current window."
-  :managed? t
-  :buffer "*exwm-status*"
-  :binding (kbd "C-c 3")
-  :separator "|"
-  :frame
-  (list
-   ;; Such a big numbers for X and Y will cause the frame to appear on the
-   ;; bottom right corner and covering the minibuffer
-   :position '(10000 . 10000)
-   :border-width 0
-   :timeout 5
-   :border-color "#bd93f9")
-
-  :units
-  (list
-   (exwm-input-mode-unit :label "")
-   (buffer-name-unit :label "")
-   (time-unit :label "")))
 
 
 (provide 'noether-views)
