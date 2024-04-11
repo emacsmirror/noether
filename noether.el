@@ -54,7 +54,7 @@ on demand.")
   (list
    :min-height 1
    :min-width 10
-   :position '(0 . 0)
+   ;;:position '(0 . 0)
    :border-width 0
    :accewpt-focus nil
    ;;:timeout 10
@@ -203,7 +203,7 @@ It will returen a pair in form of (body . props)."
         (funcall show-fn)))
 
     (let ((params (append (list buf) props noether--frame-defaults)))
-      (apply #'posframe-show params))))
+      (put name :posframe (apply #'posframe-show params)))))
 
 
 ;; We need to keep this function as simple as possible
@@ -323,7 +323,12 @@ It removes any possible watch function."
 We need to call this function when ever Emacs resized
 or the font size changed."
   (interactive)
-  (mapc #'noether--setup-views noether-views))
+  (mapc
+   (lambda (v)
+     (let ((resize-handler (noether--view-get v :on-parent-resize)))
+       (when (not (null resize-handler))
+         (funcall resize-handler v))))
+   noether-views))
 
 
 (defun noether--teardown-views (view)
@@ -346,7 +351,7 @@ or the font size changed."
   ;; Technically the argument to the refresh function should be a `frame'
   ;; but since we are not using it and we have to keep it cuz
   ;; `window-size-change-functions' expects it, We just pass true.
-  (noether-refresh t))
+  (mapc #'noether--setup-views noether-views))
 
 
 (defun noether--disable ()
