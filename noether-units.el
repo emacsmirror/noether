@@ -105,7 +105,7 @@ Emacs knowing."
 (defvar noether--timer nil)
 (defun noether--set-time ()
   "Set the current time to the internal var which is being watched."
-  (setq noether--time (format-time-string "%H:%M:%S")))
+  (setq noether--time (format-time-string "%m-%d %H:%M")))
 
 (defun noether--time-format (_ v _ _)
   "Just return the current time V."
