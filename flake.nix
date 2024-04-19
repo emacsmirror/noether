@@ -43,8 +43,8 @@
             inherit system;
             overlays = [ inputs.emacs-overlay.overlays.package ];
           };
-          emacs = pkgs.emacs29.override {
-          } // (pkgs.lib.optionalAttrs (pkgs.stdenv.isLinux) {
+          emacs = pkgs.emacs29.override
+            { } // (pkgs.lib.optionalAttrs (pkgs.stdenv.isLinux) {
             # Gtk causes a flickering issue on WM mode
             withGTK3 = false;
             toolkit = "lucid";
@@ -53,7 +53,7 @@
 
           noether = pkgs.emacsPackages.trivialBuild {
             pname = "noether";
-            version = "0.1.9";
+            version = "0.1.10";
             buildInputs = [ pkgs.emacsPackages.posframe ];
 
             src = ./.;
@@ -70,11 +70,12 @@
             runtimeInputs = [ emacsPkgs ];
 
             text = ''
-          ${emacsPkgs}/bin/emacs -Q -l ./test-noether.el "$@"
-          '';
+              ${emacsPkgs}/bin/emacs -Q -l ./test-noether.el "$@"
+            '';
           };
 
-        in {
+        in
+        {
           packages.default = noether;
           devShells.default = pkgs.mkShell {
             nativeBuildInputs = [ noether emacsPkgs test-noether ];

@@ -35,9 +35,11 @@
 (require 'noether-views)
 
 (defun noether--bottom-right (info)
-  (cons (- (frame-outer-width) 10)
-        (- (frame-outer-height) 40))
-  )
+  (cons -1 -1))
+
+(defun noether-autohide-on-echo (_)
+  (message "here")
+  (minibuffer-prompt))
 
 (noether-defview mode-line
   "A simple and minimalist mode-line like status bar"
@@ -53,7 +55,7 @@
    :poshandler #'noether--bottom-right
    :border-width 0
    ;;:timeout 5
-
+   :hidehandler #'noether-autohide-on-echo
    :border-color "#bd93f9")
 
   :units
