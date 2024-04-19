@@ -43,8 +43,7 @@
   "A simple and minimalist mode-line like status bar"
   :managed? t
   :buffer "*modeline*"
-  ;;:binding (kbd "C-c 1")
-  :timeout 0
+  :binding (kbd "C-c 1")
   :separator "|"
   :visible? t
   :frame
@@ -53,6 +52,7 @@
    ;;                 (- (frame-outer-height) 40))
    :poshandler #'noether--bottom-right
    :border-width 0
+   ;;:timeout 5
 
    :border-color "#bd93f9")
 
@@ -60,7 +60,9 @@
   (list
    (line-unit :label "")
    (buffer-name-unit :label "B: ")
-   (mode-name-unit :label "M: ")))
+   (mode-name-unit :label "M: ")
+   (time-unit)
+   (date-unit)))
 
 
 (setq noether-views (list mode-line))

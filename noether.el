@@ -28,6 +28,7 @@
 ;;; Code:
 (require 'seq)
 (require 'posframe)
+(require 'subr-x)
 
 (defgroup noether nil
   "The customization group for the noether-mode."
@@ -255,9 +256,6 @@ side BUF and F to it.  It's simple trick to make small a closure."
     (when (null f)
       (error (format "No `fn' in %s" unit)))
 
-    (when init-fn
-      (funcall init-fn))
-
     (when var
       ;; Setup the watcher and the watcher remover
       (add-variable-watcher var updater)
@@ -267,6 +265,10 @@ side BUF and F to it.  It's simple trick to make small a closure."
                    ;; the teardown process
                    (remove-variable-watcher var updater))
                  (get view-name :watcher-removers))))
+
+    (when init-fn
+      (funcall init-fn))
+    
 
     (put view-name :updaters
          (cons updater (get view-name :updaters)))

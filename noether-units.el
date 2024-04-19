@@ -29,6 +29,7 @@
   (defvar line-unit)
   (defvar buffer-name-unit)
   (defvar time-unit)
+  (defvar date-unit)
   (defvar mode-name-unit)
   (defvar projectile-project-unit)
   (declare-function projectile-project-name "projectile-project-name" ()))
@@ -105,7 +106,7 @@ Emacs knowing."
 (defvar noether--timer nil)
 (defun noether--set-time ()
   "Set the current time to the internal var which is being watched."
-  (setq noether--time (format-time-string "%m-%d %H:%M")))
+  (setq noether--time (format-time-string "%H:%M")))
 
 (defun noether--time-format (_ v _ _)
   "Just return the current time V."
@@ -115,7 +116,7 @@ Emacs knowing."
 (noether-defunit time-unit
   "just the time for your bar."
   :label "T:"
-  :len 8
+  :len 5
   :init  (lambda ()
            (setq noether--timer
                  (run-with-timer 1 1 #'noether--set-time)))
@@ -125,6 +126,35 @@ Emacs knowing."
 
   :var 'noether--time
   :fn #'noether--time-format)
+
+;; ============================================================================
+;; Daet indicator
+;; ============================================================================
+(defvar noether--date "")
+(defvar noether--date-timer nil)
+(defun noether--set-date ()
+  "Set the current date to the internal var which is being watched."
+  (setq noether--date (format-time-string "%m-%d")))
+
+(defun noether--date-format (_ v _ _)
+  "Just return the current date V."
+  v)
+
+
+(noether-defunit date-unit
+  "just the date for your bar."
+  :label "D:"
+  :len 5
+  :init  (lambda ()
+           (noether--set-date)
+           (setq noether--date-timer
+                 (run-with-timer 3600 1 #'noether--set-date)))
+  :deinit (lambda ()
+            (when noether--date-timer
+              (cancel-timer noether--date-timer)))
+
+  :var 'noether--date
+  :fn #'noether--date-format)
 
 ;; ============================================================================
 ;; Mode name
