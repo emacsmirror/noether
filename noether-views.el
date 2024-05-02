@@ -46,7 +46,7 @@
    ;; (line-unit :label "")
    (buffer-name-unit :label "B: ")
    (mode-name-unit :label "M: ")
-   (projectile-project-unit :label "P: ")
+   (project-unit :label "P: ")
    (git-branch-unit :label "Br: ")))
 
 

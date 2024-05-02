@@ -33,13 +33,15 @@
 (require 'noether)
 (require 'noether-units)
 (require 'noether-views)
+(load-theme 'tsdh-dark)
+
 
 (defun noether--bottom-right (info)
   (cons -1 -1))
 
 (defun noether-autohide-on-echo (_)
-  (message "here")
   (minibuffer-prompt))
+
 
 (noether-defview mode-line
   "A simple and minimalist mode-line like status bar"
@@ -67,7 +69,29 @@
    (date-unit)))
 
 
-(setq noether-views (list mode-line))
+(noether-defview minibuffer-ex
+  "A simple and minimalist mode-line like status bar"
+  :managed? t
+  :buffer "*modeline*"
+  :binding (kbd "C-c 2")
+  :frame
+  (list
+   :poshandler #'posframe-poshandler-frame-center
+   :border-width 1
+   :timeout 5
+   ;; :hidehandler #'noether-autohide-on-echo
+   :border-color "#bd93f9")
+
+  :units
+  (list
+   (line-unit :label "")
+   (buffer-name-unit :label "B: ")
+   (mode-name-unit :label "M: ")
+   (time-unit)
+   (project-unit)
+   (date-unit)))
+
+(setq noether-views (list minibuffer-ex))
 
 (noether-global-mode t)
 

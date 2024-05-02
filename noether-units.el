@@ -30,9 +30,7 @@
   (defvar buffer-name-unit)
   (defvar time-unit)
   (defvar date-unit)
-  (defvar mode-name-unit)
-  (defvar projectile-project-unit)
-  (declare-function projectile-project-name "projectile-project-name" ()))
+  (defvar mode-name-unit))
 
 ;; ============================================================================
 ;; line number indicator
@@ -165,29 +163,30 @@ Emacs knowing."
 
 
 ;; ============================================================================
-;; Projectile, Project Name
+;; Project Name
 ;; ============================================================================
 (defvar noether--project nil)
 
 (defun noether--set-project ()
   "Set the current project for the current buffer."
-  (let ((p (projectile-project-name)))
-    (when p
-      (setq noether--project p))))
+  (let ((p (project-current)))
+    (setq noether--project
+          (if p (project-name p)
+            nil))))
 
 (defun noether--format-project (_ v _ _)
   "Just return the current project V."
-  v)
+  (or v "-"))
 
 
-(noether-defunit projectile-project-unit
+(noether-defunit project-unit
   "Show the current project name for the current buffer"
   :label "P:"
   :len 30
   :init  (lambda ()
-           (if (and (featurep 'projectile) (boundp 'projectile-mode))
-               (add-hook 'noether-on-buffer-change-hook #'noether--set-project)
-             (warn "Can't find feature `projectile'")))
+           (when (not (boundp 'project))
+             (require 'project))
+           (add-hook 'noether-on-buffer-change-hook #'noether--set-project))
   :deinit (lambda ()
             (remove-hook 'noether-on-buffer-change-hook #'noether--set-project))
 

@@ -57,7 +57,7 @@ can be defined using the =noether-defview= macro like:
                               'display '(raise -0.1))))
    (buffer-name-unit)
    (mode-name-unit)
-   (projectile-project-unit)))
+   (project-unit)))
 #+END_SRC
 
 * Unit

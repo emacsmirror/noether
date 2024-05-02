@@ -24,7 +24,6 @@
 ;;; Change Log:
 ;;; Code:
 (setq debug-on-error t)
-(require 'projectile)
 (require 'all-the-icons)
 (require 'noether-units)
 (require 'noether-views)
@@ -54,7 +53,7 @@
                               'display '(raise -0.1))))
    (buffer-name-unit)
    (mode-name-unit)
-   (projectile-project-unit)))
+   (project-unit)))
 
 (defface noether-active-modeline
   '((((background light))
@@ -88,7 +87,6 @@
            (default-value 'face-remapping-alist) face-remaps))))
 
 
-(projectile-global-mode t)
 (noether-global-mode t)
 
 

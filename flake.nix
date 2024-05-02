@@ -53,14 +53,13 @@
 
           noether = pkgs.emacsPackages.trivialBuild {
             pname = "noether";
-            version = "0.1.10";
+            version = "0.1.11";
             buildInputs = [ pkgs.emacsPackages.posframe ];
 
             src = ./.;
           };
 
           emacsPkgs = (pkgs.emacsPackagesFor emacs).withPackages (epkgs: [
-            epkgs.projectile
             epkgs.posframe
             noether
           ]);
