@@ -174,6 +174,7 @@ Emacs knowing."
           (if p (project-name p)
             nil))))
 
+
 (defun noether--format-project (_ v _ _)
   "Just return the current project V."
   (or v "-"))

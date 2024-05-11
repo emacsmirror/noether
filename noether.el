@@ -51,6 +51,10 @@ on demand.")
   "A hook that runs whenever noether detects focus change on buffers.")
 
 
+(defvar noether--visible-sticky-views ()
+  "An internal list to index the views that must be `visible' and `sticky'.")
+
+
 (defvar noether--frame-defaults
   (list
    :min-height 1
@@ -204,7 +208,14 @@ It will returen a pair in form of (body . props)."
         (funcall show-fn)))
 
     (let ((params (append (list buf) props noether--frame-defaults)))
-      (put name :posframe (apply #'posframe-show params)))))
+      (put name :posframe (apply #'posframe-show params)))
+
+    ;; (when (plist-get props :sticky)
+    ;;   (with-current-buffer buf
+    ;;     (message "hererererere")
+    ;;     (set-frame-parameter posframe--frame 'sticky t)
+    ;;     (pp (frame-parameters posframe--frame))))
+    ))
 
 
 ;; We need to keep this function as simple as possible
@@ -268,7 +279,7 @@ side BUF and F to it.  It's simple trick to make small a closure."
 
     (when init-fn
       (funcall init-fn))
-    
+
 
     (put view-name :updaters
          (cons updater (get view-name :updaters)))
@@ -283,6 +294,24 @@ E.g. the updaters list."
   (put (noether--view-get view :name) :updaters nil))
 
 
+(defun noether--frame-focus-changed ()
+  "Check for any view that is defined as `stick' and `visible' and raise them."
+  ;; `selected-frame' can be different than the actual focused frame frome the X
+  ;; perspective. Soo we need to figure out which frame has the focus, and re-parent
+  ;; our `visible' and `sticky' views (technically the frame of a view) and
+  ;; raise them
+  (dolist (frame (frame-list))
+    (pcase (frame-focus-state frame)
+      (`t (mapc
+           (lambda (view)
+             (with-current-buffer (noether--view-get view :buffer)
+               ;; `posframe--frame' is buffer local, so it is safe
+               ;; to raise it
+               (set-frame-parameter posframe--frame 'parent-frame frame)
+               (raise-frame posframe--frame)))
+           noether--visible-sticky-views)))))
+
+
 (defun noether--setup-views (view)
   "Setup the given VIEW by setting up its units."
   (when (not (listp view))
@@ -292,14 +321,20 @@ E.g. the updaters list."
 
   (let ((name (noether--view-get view :name))
         (binding (noether--view-get view :binding))
-        (visible (noether--view-get view :visible?)))
+        (visible (noether--view-get view :visible?))
+        (sticky (noether--view-get view :sticky?)))
 
     (when (not (null binding))
       (define-key noether-global-mode-map binding
-        (lambda () (interactive) (noether-show view))))
+                  (lambda () (interactive) (noether-show view))))
 
     (when visible
       (noether-show view))
+
+    ;; We need to take care of `visible' and `sticky' views
+    ;; when the frame at focus changes. So let's index them
+    (when (and visible sticky)
+      (add-to-list 'noether--visible-sticky-views view))
 
     (with-current-buffer (get-buffer-create (noether--view-get view :buffer (format "*%s*" name)))
       (erase-buffer)
@@ -350,6 +385,7 @@ or the font size changed."
   (add-to-list 'window-selection-change-functions #'noether--buffer-focus-change-runner)
   (add-to-list 'window-size-change-functions #'noether-refresh)
 
+  (add-function :after after-focus-change-function #'noether--frame-focus-changed)
   ;; Technically the argument to the refresh function should be a `frame'
   ;; but since we are not using it and we have to keep it cuz
   ;; `window-size-change-functions' expects it, We just pass true.
@@ -361,6 +397,10 @@ or the font size changed."
   (delete #'noether--buffer-focus-change-runner window-buffer-change-functions)
   (delete #'noether--buffer-focus-change-runner window-selection-change-functions)
   (delete #'noether-refresh window-size-change-functions)
+
+  (setq noether--visible-sticky-views nil)
+  (remove-function after-focus-change-function #'noether--frame-focus-changed)
+
   (mapc #'noether--teardown-views noether-views))
 
 

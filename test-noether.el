@@ -35,6 +35,7 @@
 (require 'noether-views)
 (load-theme 'tsdh-dark)
 
+(defmacro comment (&rest _) nil)
 
 (defun noether--bottom-right (info)
   (cons -1 -1))
@@ -42,6 +43,17 @@
 (defun noether-autohide-on-echo (_)
   (minibuffer-prompt))
 
+(comment
+  (with-current-buffer (get-buffer "*modeline*")
+  (set-frame-parameter posframe--frame 'sticky t)
+  (pp (frame-parameters posframe--frame))))
+;; (setq f1 (make-frame '((name . "f1") )))
+;; (setq f2 (make-frame '((name . "f2") )))
+;; (setq f3 (make-frame '((name . "f3") )))
+
+;; (nth 3 (frame-list))
+;; (visible-frame-list)
+;; (select-frame (nth 2 (frame-list)))
 
 (noether-defview mode-line
   "A simple and minimalist mode-line like status bar"
@@ -52,10 +64,13 @@
   :visible? t
   :frame
   (list
+   :name "modeline"
    ;; :position (cons (- (frame-outer-width) 10)
    ;;                 (- (frame-outer-height) 40))
    :poshandler #'noether--bottom-right
    :border-width 0
+
+   ;;   :parent-frame f1
    ;;:timeout 5
    :hidehandler #'noether-autohide-on-echo
    :border-color "#bd93f9")
@@ -64,9 +79,7 @@
   (list
    (line-unit :label "")
    (buffer-name-unit :label "B: ")
-   (mode-name-unit :label "M: ")
-   (time-unit)
-   (date-unit)))
+   ))
 
 
 (noether-defview minibuffer-ex
@@ -74,24 +87,26 @@
   :managed? t
   :buffer "*modeline*"
   :binding (kbd "C-c 2")
+  :visible? t
+  :sticky? t
   :frame
   (list
+   :name "ex"
+   :explicit-name "ex"
    :poshandler #'posframe-poshandler-frame-center
    :border-width 1
-   :timeout 5
+   ;;   :parent-frame f2
    ;; :hidehandler #'noether-autohide-on-echo
    :border-color "#bd93f9")
 
   :units
   (list
-   (line-unit :label "")
-   (buffer-name-unit :label "B: ")
    (mode-name-unit :label "M: ")
-   (time-unit)
-   (project-unit)
-   (date-unit)))
 
-(setq noether-views (list minibuffer-ex))
+   (project-unit)
+   ))
+
+(setq noether-views (list minibuffer-ex ))
 
 (noether-global-mode t)
 
