@@ -88,6 +88,12 @@ on demand.")
 ;; ============================================================================
 ;; Macros
 ;; ============================================================================
+(defmacro explanation (_ &rest block)
+  "A simple macro to add a docstring DOC for a BLOCK of code."
+  (declare (indent defun) (doc-string 1))
+  `(progn ,@block))
+
+
 (defmacro noether--unit-get (unit key &optional default)
   "Return the value of the KEY in UNIT or the DEFAULT value if it doesn't exist."
   `(or (plist-get ,unit ,key) ,default))
@@ -307,26 +313,32 @@ E.g. the updaters list."
   (put (noether--view-get view :name) :updaters nil))
 
 
-(defun noether--on-minibuffer-enter ()
-  "Hide views that set `:hide-when-minibuffer?' to t when entering minibuffer."
-  (message "enter")
-  (mapc
-   (lambda (view)
-     (with-current-buffer (noether--view-get view :buffer)
-       (posframe--make-frame-invisible posframe--frame)))
+(explanation
+  "In some views that `:visible?' is set to t, the view might have some overlaps
+with the minibuffer. For example a modeline similar to `mini-mode-line' that
+draws a view on the echo area. For these types of views user can set the value
+of `:hide-when-minibuffer?' to t. This way we can use the following functions
+and add them to the `minibuffer-setup-hook' and `minibuffer-exit-hook' to hide and
+show the views that we already collected at setup time."
 
-   noether--hide-when-minibuffer))
+  (defun noether--on-minibuffer-enter ()
+    "Hide views that set `:hide-when-minibuffer?' to t when entering minibuffer."
+    (mapc
+     (lambda (view)
+       (with-current-buffer (noether--view-get view :buffer)
+         (posframe--make-frame-invisible posframe--frame)))
+
+     noether--hide-when-minibuffer))
 
 
-(defun noether--on-minibuffer-exit ()
-  "Show views that set `:hide-when-minibuffer?' to t when exiting minibuffer."
-  (message "exit")
-  (mapc
-   (lambda (view)
-     (with-current-buffer (noether--view-get view :buffer)
-       (posframe--make-frame-visible posframe--frame)))
+  (defun noether--on-minibuffer-exit ()
+    "Show views that set `:hide-when-minibuffer?' to t when exiting minibuffer."
+    (mapc
+     (lambda (view)
+       (with-current-buffer (noether--view-get view :buffer)
+         (posframe--make-frame-visible posframe--frame)))
 
-   noether--hide-when-minibuffer))
+     noether--hide-when-minibuffer)))
 
 
 (defun noether--frame-focus-changed ()
