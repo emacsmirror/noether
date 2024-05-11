@@ -185,7 +185,6 @@ key/value from the original definition."
        (append '(:name ,(intern (format ":%s" (symbol-name name))))
                f-props (list ,@orig-props)))))
 
-
 ;; ============================================================================
 ;; Helper functions
 ;; ============================================================================
