@@ -40,6 +40,7 @@
 (eval-when-compile
   (defvar noether-global-mode-map))
 
+
 (defvar noether-views ()
   "A list of views that noether should manage.
 
@@ -53,6 +54,24 @@ on demand.")
 
 (defvar noether--visible-sticky-views ()
   "An internal list to index the views that must be `visible' and `sticky'.")
+
+(defvar noether--hide-when-minibuffer ()
+  "An internal list to index the views that must hide when minibuffer is active.")
+
+
+(defvar noether--view-schema
+  (list
+   :managed? t
+   :buffer "*exwm-status*"
+   :binding (kbd "C-c 0")
+   :separator " "
+   :visible? t
+   :sticky t
+   :timeout 0
+   :hide-when-minibuffer? t
+   :on-parent-resize #'fg42/adjust-modeline
+   :frame '()
+   :units '()))
 
 
 (defvar noether--frame-defaults
@@ -142,6 +161,7 @@ the show function."
        (put ',name :initial-content ,initial-content)
        t)))
 
+
 (defmacro noether-defunit (name docs &rest props)
   "Define a unit with the given NAME, DOCS and a set of PROPS.
 It will define a function with the given NAME that accepts any
@@ -208,14 +228,7 @@ It will returen a pair in form of (body . props)."
         (funcall show-fn)))
 
     (let ((params (append (list buf) props noether--frame-defaults)))
-      (put name :posframe (apply #'posframe-show params)))
-
-    ;; (when (plist-get props :sticky)
-    ;;   (with-current-buffer buf
-    ;;     (message "hererererere")
-    ;;     (set-frame-parameter posframe--frame 'sticky t)
-    ;;     (pp (frame-parameters posframe--frame))))
-    ))
+      (put name :posframe (apply #'posframe-show params)))))
 
 
 ;; We need to keep this function as simple as possible
@@ -294,6 +307,28 @@ E.g. the updaters list."
   (put (noether--view-get view :name) :updaters nil))
 
 
+(defun noether--on-minibuffer-enter ()
+  "Hide views that set `:hide-when-minibuffer?' to t when entering minibuffer."
+  (message "enter")
+  (mapc
+   (lambda (view)
+     (with-current-buffer (noether--view-get view :buffer)
+       (posframe--make-frame-invisible posframe--frame)))
+
+   noether--hide-when-minibuffer))
+
+
+(defun noether--on-minibuffer-exit ()
+  "Show views that set `:hide-when-minibuffer?' to t when exiting minibuffer."
+  (message "exit")
+  (mapc
+   (lambda (view)
+     (with-current-buffer (noether--view-get view :buffer)
+       (posframe--make-frame-visible posframe--frame)))
+
+   noether--hide-when-minibuffer))
+
+
 (defun noether--frame-focus-changed ()
   "Check for any view that is defined as `stick' and `visible' and raise them."
   ;; `selected-frame' can be different than the actual focused frame frome the X
@@ -335,6 +370,12 @@ E.g. the updaters list."
     ;; when the frame at focus changes. So let's index them
     (when (and visible sticky)
       (add-to-list 'noether--visible-sticky-views view))
+
+    ;; If the view in question set the `:hide-when-minibuffer?' to t
+    ;; then we need a handle to the view for the handler function
+    ;; to take care of it.
+    (when (noether--view-get view :hide-when-minibuffer?)
+      (add-to-list 'noether--hide-when-minibuffer view))
 
     (with-current-buffer (get-buffer-create (noether--view-get view :buffer (format "*%s*" name)))
       (erase-buffer)
@@ -384,6 +425,8 @@ or the font size changed."
   (add-to-list 'window-buffer-change-functions #'noether--buffer-focus-change-runner)
   (add-to-list 'window-selection-change-functions #'noether--buffer-focus-change-runner)
   (add-to-list 'window-size-change-functions #'noether-refresh)
+  (add-hook 'minibuffer-setup-hook #'noether--on-minibuffer-enter)
+  (add-hook 'minibuffer-exit-hook #'noether--on-minibuffer-exit)
 
   (add-function :after after-focus-change-function #'noether--frame-focus-changed)
   ;; Technically the argument to the refresh function should be a `frame'
@@ -397,6 +440,9 @@ or the font size changed."
   (delete #'noether--buffer-focus-change-runner window-buffer-change-functions)
   (delete #'noether--buffer-focus-change-runner window-selection-change-functions)
   (delete #'noether-refresh window-size-change-functions)
+
+  (remove-hook 'minibuffer-setup-hook #'noether--on-minibuffer-enter)
+  (remove-hook 'minibuffer-exit-hook #'noether--on-minibuffer-exit)
 
   (setq noether--visible-sticky-views nil)
   (remove-function after-focus-change-function #'noether--frame-focus-changed)

@@ -21,7 +21,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 {
-  description = "A modeline which plays hide and seek";
+  description = "A frame work to create frames that updates based on certain events";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/442d407992384ed9c0e6d352de75b69079904e4e";
   inputs.emacs-overlay.url = "github:nix-community/emacs-overlay/0f7f3b39157419f3035a2dad39fbaf8a4ba0448d";
@@ -85,8 +85,6 @@
             type = "app";
             program = "${test-noether}/bin/test-noether";
           };
-
         };
-
     });
 }

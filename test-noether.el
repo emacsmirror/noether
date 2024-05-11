@@ -89,6 +89,7 @@
   :binding (kbd "C-c 2")
   :visible? t
   :sticky? t
+  :hide-when-minibuffer? t
   :frame
   (list
    :name "ex"
@@ -103,8 +104,7 @@
   (list
    (mode-name-unit :label "M: ")
 
-   (project-unit)
-   ))
+   (project-unit)))
 
 (setq noether-views (list minibuffer-ex ))
 
