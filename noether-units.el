@@ -30,7 +30,9 @@
   (defvar buffer-name-unit)
   (defvar time-unit)
   (defvar date-unit)
-  (defvar mode-name-unit))
+  (defvar mode-name-unit)
+  (require 'project)
+  (defvar project-name))
 
 ;; ============================================================================
 ;; line number indicator

@@ -1,26 +1,30 @@
+
 # Table of Contents
 
-1.  [Noether Mode](#org75cbe37)
-2.  [View](#org20ebd3a)
-3.  [Unit](#orga2816e4)
+1.  [Noether Mode](#orge24809d)
+2.  [View](#org1e23539)
+3.  [Unit](#orgf19586f)
 
 
-<a id="org75cbe37"></a>
+<a id="orge24809d"></a>
 
 # Noether Mode
 
 In admiration of [Amalie Emmy Noether](https://en.wikipedia.org/wiki/Emmy_Noether).
 
-**Noether Mode** is a global minor mode which manages user defined [Views](#org20ebd3a). Views can be called upon
-using their corresponding function or keybinding. Each of them, may contain one or more [Units](#orga2816e4) that
+**Noether Mode** is a global minor mode which manages user-defined [Views](#org1e23539). Views can be called upon
+using their corresponding function or keybinding. Each of them, may contain one or more [Units](#orgf19586f) that
 can automatically update the parent view. As an example, my main use case for **Noether Mode** is a
 replacement for mode line. I defined a View with a bunch of units like, buffer name, project name,
 current time, line/column number of the cursor, and so on. And I used `C-c 1` as the keybinding,
 and set the timeout of the view to 10 seconds. Subsequently, I just disabled the mode line since I
-don't use it any more. Whenever I need the view, I just the `C-c 1` to call upon it. Noether shows
+don't use it any more. Whenever I need the view, I just use `C-c 1` to call upon it. Noether shows
 it to me for 10 seconds in a position that I set in the view definition.
 
-One can create a view with several resource utilization units to have a status bar.
+![img](./img/noether-screenshot.png "Noether as a modeline replacement on FG42")
+
+One can create a view with several resource utilization units to have a status bar or, maybe a dashboard
+with certain information, or quake style view with useful info. It's up to the user to utilize noether.
 
 The way **Noether** works is a bit opinionated. While using timers is fine as long as you're OK
 with their performance penalty, **Noether** uses variable watches to update each unit. Moreover,
@@ -28,14 +32,14 @@ unlike mode line, unit length in **Noether** is fixed. Just because I don't like
 to jump around in a view.
 
 
-<a id="org20ebd3a"></a>
+<a id="org1e23539"></a>
 
 # View
 
 Each view represents a frame in Emacs literature (controlled by [posframe](https://github.com/tumashu/posframe) under the hood). A view
 can be defined using the `noether-defview` macro like:
 
-```lisp
+````lisp
     (noether-defview example-bar
     "Just a test view"
 
@@ -73,7 +77,7 @@ can be defined using the `noether-defview` macro like:
      (project-unit)))
 ```
 
-<a id="orga2816e4"></a>
+<a id="orgf19586f"></a>
 
 # Unit
 
@@ -86,7 +90,7 @@ In general, a unit is just a data structure with few properties:
 
 -   `:label` An optional string to be used as a label for the unit
 -   `:len` A mandatory integer that defines the maximum number of characters, that the unit will
-    occupie in the view. **Noether** uses this integer to calculate the position for the next unit.
+    occupied in the view. **Noether** uses this integer to calculate the position for the next unit.
 
 -   `:init` A function that will be called by **Noether** when setting up a view. Each unit can set up
     whatever that, it might need to be operated in this function. For example, any hook or timer.
@@ -104,7 +108,7 @@ In general, a unit is just a data structure with few properties:
     changes. This function will be called with the following arguments
     `(SYMBOL NEWVAL OPERATION WHERE)`. Most of the time, you just need the `NEWVAL` parameter.
 
-While **Noether** comes with a few units, you can define you own like:
+While **Noether** comes with a few units, your can define your own like:
 
 ```lisp
     ;; The variable that we want to watch

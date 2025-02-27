@@ -58,6 +58,9 @@ on demand.")
 (defvar noether--hide-when-minibuffer ()
   "An internal list to index the views that must hide when minibuffer is active.")
 
+(defun noether--adjust-modeline (view)
+  "Adjust the VIEW after parent frame resize."
+  (noether-show view))
 
 (defvar noether--view-schema
   (list
@@ -69,7 +72,7 @@ on demand.")
    :sticky t
    :timeout 0
    :hide-when-minibuffer? t
-   :on-parent-resize #'fg42/adjust-modeline
+   :on-parent-resize #'noether--adjust-modeline
    :frame '()
    :units '()))
 

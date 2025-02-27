@@ -1,17 +1,23 @@
 * Noether Mode
 In admiration of [[https://en.wikipedia.org/wiki/Emmy_Noether][Amalie Emmy Noether]].
 
-*Noether Mode* is a global minor mode which manages user defined [[*View][Views]]. Views can be called upon
+*Noether Mode* is a global minor mode which manages user-defined [[*View][Views]]. Views can be called upon
 using their corresponding function or keybinding. Each of them, may contain one or more [[*Unit][Units]] that
 can automatically update the parent view. As an example, my main use case for *Noether Mode* is a
 replacement for mode line. I defined a View with a bunch of units like, buffer name, project name,
 current time, line/column number of the cursor, and so on. And I used ~C-c 1~ as the keybinding,
 and set the timeout of the view to 10 seconds. Subsequently, I just disabled the mode line since I
-don't use it any more. Whenever I need the view, I just the ~C-c 1~ to call upon it. Noether shows
+don't use it any more. Whenever I need the view, I just use ~C-c 1~ to call upon it. Noether shows
 it to me for 10 seconds in a position that I set in the view definition.
 
-One can create a view with several resource utilization units to have a status bar.
+#+CAPTION: Noether as a modeline replacement on FG42
+#+ATTR_HTML: :align center
+#+ATTR_ORG: :align center
+#+NAME:   fig:Figure 1
+[[./img/noether-screenshot.png]]
 
+One can create a view with several resource utilization units to have a status bar or, maybe a dashboard
+with certain information, or quake style view with useful info. It's up to the user to utilize noether.
 
 The way *Noether* works is a bit opinionated. While using timers is fine as long as you're OK
 with their performance penalty, *Noether* uses variable watches to update each unit. Moreover,
@@ -69,7 +75,7 @@ you switch to another buffer.
 In general, a unit is just a data structure with few properties:
 - =:label= An optional string to be used as a label for the unit
 - =:len= A mandatory integer that defines the maximum number of characters, that the unit will
-  occupie in the view. *Noether* uses this integer to calculate the position for the next unit.
+  occupied in the view. *Noether* uses this integer to calculate the position for the next unit.
 
 - =:init= A function that will be called by *Noether* when setting up a view. Each unit can set up
   whatever that, it might need to be operated in this function. For example, any hook or timer.
@@ -88,7 +94,7 @@ In general, a unit is just a data structure with few properties:
   =(SYMBOL NEWVAL OPERATION WHERE)=. Most of the time, you just need the =NEWVAL= parameter.
 
 
-While *Noether* comes with a few units, you can define you own like:
+While *Noether* comes with a few units, your can define your own like:
 
 #+BEGIN_SRC emacs-lisp
   ;; The variable that we want to watch
