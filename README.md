@@ -35,6 +35,7 @@ to jump around in a view.
 Each view represents a frame in Emacs literature (controlled by [posframe](https://github.com/tumashu/posframe) under the hood). A view
 can be defined using the `noether-defview` macro like:
 
+```lisp
     (noether-defview example-bar
     "Just a test view"
 
@@ -70,7 +71,7 @@ can be defined using the `noether-defview` macro like:
      (buffer-name-unit)
      (mode-name-unit)
      (project-unit)))
-
+```
 
 <a id="orga2816e4"></a>
 
@@ -105,6 +106,7 @@ In general, a unit is just a data structure with few properties:
 
 While **Noether** comes with a few units, you can define you own like:
 
+```lisp
     ;; The variable that we want to watch
     (defvar noether--project "")
 
@@ -148,3 +150,4 @@ While **Noether** comes with a few units, you can define you own like:
 
       ;; The function to call whenever `noether--project' changes
       :fn #'noether--format-project)
+```
