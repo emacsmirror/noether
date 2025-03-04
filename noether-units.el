@@ -6,6 +6,7 @@
 ;; URL: https://devheroes.codes/lxsameer/noether
 ;; Version: 0.1.0
 ;; Keywords: frames, modeline
+;; Package-Requires: (emacs "29.1")
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -106,7 +107,7 @@ Emacs knowing."
 (defvar noether--timer nil)
 (defun noether--set-time ()
   "Set the current time to the internal var which is being watched."
-  (setq noether--time (format-time-string "%H:%M")))
+  (setq noether--time (format-time-string "%R")))
 
 (defun noether--time-format (_ v _ _)
   "Just return the current time V."
@@ -114,7 +115,7 @@ Emacs knowing."
 
 
 (noether-defunit time-unit
-  "just the time for your bar."
+  "Just the time for your bar."
   :label "T:"
   :len 5
   :init  (lambda ()
@@ -142,7 +143,7 @@ Emacs knowing."
 
 
 (noether-defunit date-unit
-  "just the date for your bar."
+  "Just the date for your bar."
   :label "D:"
   :len 5
   :init  (lambda ()
@@ -160,7 +161,7 @@ Emacs knowing."
 ;; Mode name
 ;; ============================================================================
 (noether-from-modeline mode-name-unit
-  "Returns the current mode name"
+  "Returns the current mode name."
   "" "%m" 16)
 
 
@@ -183,7 +184,7 @@ Emacs knowing."
 
 
 (noether-defunit project-unit
-  "Show the current project name for the current buffer"
+  "Show the current project name for the current buffer."
   :label "P:"
   :len 30
   :init  (lambda ()

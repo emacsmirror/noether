@@ -91,7 +91,7 @@ on demand.")
 ;; ============================================================================
 ;; Macros
 ;; ============================================================================
-(defmacro explanation (_ &rest block)
+(defmacro noether--explanation (_ &rest block)
   "A simple macro to add a docstring DOC for a BLOCK of code."
   (declare (indent defun) (doc-string 1))
   `(progn ,@block))
@@ -283,10 +283,10 @@ side BUF and F to it.  It's simple trick to make small a closure."
          (updater (noether--make-updater buf f start-point len)))
 
     (when (null name)
-      (error (format "No :name for unit %s" unit)))
+      (error "No :name for unit %s" unit))
 
     (when (null f)
-      (error (format "No `fn' in %s" unit)))
+      (error "No `fn' in %s" unit))
 
     (when var
       ;; Setup the watcher and the watcher remover
@@ -315,7 +315,7 @@ E.g. the updaters list."
   (put (noether--view-get view :name) :updaters nil))
 
 
-(explanation
+(noether--explanation
   "In some views that `:visible?' is set to t, the view might have some overlaps
 with the minibuffer. For example a modeline similar to `mini-mode-line' that
 draws a view on the echo area. For these types of views user can set the value
@@ -364,7 +364,7 @@ show the views that we already collected at setup time."
 (defun noether--setup-views (view)
   "Setup the given VIEW by setting up its units."
   (when (not (listp view))
-    (error (format "The given value as a view is not a list: %s" view)))
+    (error "The given value as a view is not a list: %s" view))
 
   (noether--reset-view-state view)
 
@@ -373,7 +373,7 @@ show the views that we already collected at setup time."
         (visible (noether--view-get view :visible?))
         (sticky (noether--view-get view :sticky?)))
 
-    (when (not (null binding))
+    (when (not binding)
       (define-key noether-global-mode-map binding
                   (lambda () (interactive) (noether-show view))))
 
@@ -418,7 +418,7 @@ or the font size changed."
   (mapc
    (lambda (v)
      (let ((resize-handler (noether--view-get v :on-parent-resize)))
-       (when (not (null resize-handler))
+       (when (not resize-handler)
          (funcall resize-handler v))))
    noether-views))
 

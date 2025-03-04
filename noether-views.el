@@ -29,7 +29,7 @@
 (require 'noether-units)
 
 (noether-defview noether-minimal-mode-line
-  "A simple and minimalist mode-line like status bar"
+  "A simple and minimalist mode-line like status bar."
   :managed? t
   :buffer "*mainview*"
   :binding (kbd "C-c 1")
@@ -51,8 +51,8 @@
 
 
 (noether-defview noether-minimal-location
-  "A super simple bar containing the line number and column number that
-Appears on the center of the current window."
+  "A super simple bar containing the line number and column number.
+It appears on the center of the current window."
   :managed? t
   :buffer "*location*"
   :binding (kbd "C-c 2")
