@@ -64,12 +64,14 @@
             noether
           ]);
 
+          test-template = ./test-noether.el.in;
+
           test-noether = pkgs.writeShellApplication {
             name = "test-noether";
             runtimeInputs = [ emacsPkgs ];
 
             text = ''
-              ${emacsPkgs}/bin/emacs -Q -l ./test-noether.el "$@"
+              ${emacsPkgs}/bin/emacs -Q -l ${test-template} "$@"
             '';
           };
 
