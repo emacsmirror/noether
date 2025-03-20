@@ -274,7 +274,7 @@ side BUF and F to it.  It's simple trick to make small a closure."
          (label (noether--unit-get unit :label ""))
          (buf (noether--view-get view :buffer))
          (sep (noether--view-get view :separator))
-         (var (noether--unit-get unit :var))
+         (vars (flatten-list (list (noether--unit-get unit :var))))
          (name (noether--unit-get unit :name))
          (view-name (noether--view-get view :name))
          (start-point (+ point-state (length label)))
@@ -288,15 +288,16 @@ side BUF and F to it.  It's simple trick to make small a closure."
     (when (null f)
       (error "No `fn' in %s" unit))
 
-    (when var
-      ;; Setup the watcher and the watcher remover
-      (add-variable-watcher var updater)
-      (put view-name :watcher-removers
-           (cons (lambda ()
-                   ;; We will call this function later during
-                   ;; the teardown process
-                   (remove-variable-watcher var updater))
-                 (get view-name :watcher-removers))))
+    (when vars
+      (dolist (var vars)
+        ;; Setup the watcher and the watcher remover
+        (add-variable-watcher var updater)
+        (put view-name :watcher-removers
+             (cons (lambda ()
+                     ;; We will call this function later during
+                     ;; the teardown process
+                     (remove-variable-watcher var updater))
+                   (get view-name :watcher-removers)))))
 
     (when init-fn
       (funcall init-fn))
