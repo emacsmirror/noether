@@ -222,7 +222,6 @@ It will returen a pair in form of (body . props)."
 (defun noether-show (view)
   "Draw the given VIEW on the screen."
   ;; View has to be processed at this stage
-  (interactive)
   (let* ((show-fn (noether--view-get view :show (lambda ())))
          (name (noether--view-get view :name))
          ;; What if the user killed the buffer before?
@@ -411,9 +410,8 @@ It removes any possible watch function."
 
 (defun noether-refresh (&optional _)
   "Refresh views.
-We need to call this function when ever Emacs resized
+We need to call this function whenever Emacs resized
 or the font size changed."
-  (interactive)
   (mapc
    (lambda (v)
      (let ((resize-handler (noether--view-get v :on-parent-resize)))
