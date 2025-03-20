@@ -374,7 +374,7 @@ show the views that we already collected at setup time."
         (visible (noether--view-get view :visible?))
         (sticky (noether--view-get view :sticky?)))
 
-    (when (not binding)
+    (when binding
       (define-key noether-global-mode-map binding
                   (lambda () (interactive) (noether-show view))))
 
