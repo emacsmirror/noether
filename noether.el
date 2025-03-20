@@ -249,11 +249,9 @@ It will pass WATCH-PARAMS to the unit's `:fn'"
     (with-current-buffer buf
       (save-excursion
         (let ((txt (truncate-string-to-width res len)))
-          (replace-region-contents
-           (+ 1 start-point)
-           (+ 1 start-point len)
-           (lambda () (string-pad txt len))))))))
-
+          (goto-char (+ 1 start-point))
+          (delete-char len)
+          (insert (string-pad txt len)))))))
 
 (defun noether--make-updater (buf f start-point len)
   "Create an updater for the given buffer BUF using the function F.
