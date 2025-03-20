@@ -417,7 +417,7 @@ or the font size changed."
   (mapc
    (lambda (v)
      (let ((resize-handler (noether--view-get v :on-parent-resize)))
-       (when (not resize-handler)
+       (when resize-handler
          (funcall resize-handler v))))
    noether-views))
 
